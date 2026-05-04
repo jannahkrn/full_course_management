@@ -1,4 +1,4 @@
-# Smart Exam — BR-005 Course Management Backend
+# Smart Exam — BR-005 Course Management
 
 Laravel 10+ | MySQL | Sanctum Auth
 
