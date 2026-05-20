@@ -10,18 +10,106 @@
 <div class="p-6 space-y-5">
 
     {{-- ── Page Header ────────────────────────────────────────── --}}
-    <div class="flex items-start justify-between">
+    <div class="flex items-start justify-between gap-3 flex-wrap">
         <div>
             <h1 class="text-[22px] font-bold text-gray-900 leading-tight">Daftar Mata Kuliah</h1>
             <p class="text-sm text-gray-500 mt-1">Kelola seluruh mata kuliah di Smart Exam.</p>
         </div>
-        <a href="{{ route('admin.courses.create') }}" class="btn-primary">
-            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/>
-            </svg>
-            Tambah Mata Kuliah
-        </a>
+
+        {{-- Action Buttons Group --}}
+        <div class="flex items-center gap-2 flex-wrap">
+
+            {{-- Import / Export Dropdown --}}
+            <div x-data="{ openIE: false }" class="relative">
+                <button @click="openIE = !openIE"
+                        class="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg border border-gray-200 bg-white hover:bg-gray-50 text-sm font-medium text-gray-600 transition-colors">
+                    <svg class="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
+                    </svg>
+                    Import / Export
+                    <svg class="w-3 h-3 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                    </svg>
+                </button>
+                <div x-show="openIE" @click.outside="openIE = false" x-cloak
+                     class="absolute right-0 mt-1 w-56 bg-white rounded-xl shadow-xl border border-gray-100 py-1.5 z-30">
+
+                    <p class="px-4 pt-1 pb-1 text-[10px] font-bold text-gray-400 uppercase tracking-widest">Export Daftar Mata Kuliah</p>
+
+                    {{-- Export CSV --}}
+                    <a href="{{ route('admin.courses.export', array_merge(request()->query(), ['format' => 'csv'])) }}"
+                       class="flex items-center gap-3 px-4 py-2 text-[13px] text-gray-700 hover:bg-gray-50">
+                        <svg class="w-4 h-4 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                        </svg>
+                        Export ke CSV
+                    </a>
+
+                    {{-- Export Excel --}}
+                    <a href="{{ route('admin.courses.export', array_merge(request()->query(), ['format' => 'xlsx'])) }}"
+                       class="flex items-center gap-3 px-4 py-2 text-[13px] text-gray-700 hover:bg-gray-50">
+                        <svg class="w-4 h-4 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                        </svg>
+                        Export ke Excel
+                    </a>
+
+                    <div class="border-t border-gray-100 my-1"></div>
+                    <p class="px-4 pt-1 pb-1 text-[10px] font-bold text-gray-400 uppercase tracking-widest">Import</p>
+
+                    {{-- Import Courses --}}
+                    <button type="button"
+                            onclick="document.getElementById('importCoursesModal').classList.remove('hidden')"
+                            class="w-full flex items-center gap-3 px-4 py-2 text-[13px] text-gray-700 hover:bg-gray-50">
+                        <svg class="w-4 h-4 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
+                        </svg>
+                        Import Mata Kuliah
+                    </button>
+
+                    {{-- Import Users List --}}
+                    <button type="button"
+                            onclick="document.getElementById('importUsersModal').classList.remove('hidden')"
+                            class="w-full flex items-center gap-3 px-4 py-2 text-[13px] text-gray-700 hover:bg-gray-50">
+                        <svg class="w-4 h-4 text-purple-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>
+                        </svg>
+                        Import Daftar Pengguna
+                    </button>
+                </div>
+            </div>
+
+            {{-- Tambah Pengguna ke Mata Kuliah --}}
+            <a href="{{ route('admin.enrollments.add-users') }}"
+               class="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg border border-gray-200 bg-white hover:bg-gray-50 text-sm font-medium text-gray-600 transition-colors">
+                <svg class="w-4 h-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/>
+                </svg>
+                Tambah Pengguna ke Mata Kuliah
+            </a>
+
+            {{-- Tambah Mata Kuliah --}}
+            <a href="{{ route('admin.courses.create') }}" class="btn-primary">
+                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/>
+                </svg>
+                Tambah Mata Kuliah
+            </a>
+        </div>
     </div>
+
+    {{-- Flash Messages --}}
+    @if(session('success'))
+    <div class="p-4 bg-green-50 border border-green-200 rounded-xl text-sm text-green-700 flex items-center gap-2">
+        <svg class="w-4 h-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+        </svg>
+        {{ session('success') }}
+    </div>
+    @endif
+    @if(session('error'))
+    <div class="p-4 bg-red-50 border border-red-200 rounded-xl text-sm text-red-700">{{ session('error') }}</div>
+    @endif
 
     {{-- ── Tabs ────────────────────────────────────────────────── --}}
     <div class="border-b border-gray-200">
@@ -285,7 +373,7 @@
                             @endif
                         </td>
 
-                        {{-- AKSI — List Standar --}}
+                        {{-- AKSI — List Standar (CRUD: View, Edit, Duplicate, Delete) --}}
                         <td class="px-4 py-3.5">
                             <div x-data="{ open: false }" class="relative inline-block">
                                 <button @click="open = !open"
@@ -298,25 +386,17 @@
                                 <div x-show="open" @click.outside="open = false" x-cloak
                                      class="absolute right-0 mt-1 w-52 bg-white rounded-xl shadow-xl border border-gray-100 py-1.5 z-20">
 
-                                    {{-- Situs Mata Kuliah --}}
+                                    {{-- Read: Situs Mata Kuliah --}}
                                     <a href="{{ route('admin.courses.show', $course) }}"
                                        class="flex items-center gap-3 px-4 py-2 text-[13px] text-gray-700 hover:bg-gray-50">
                                         <svg class="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
                                         </svg>
-                                        Situs Mata Kuliah
+                                        Lihat Detail
                                     </a>
 
-                                    {{-- Penelusuran --}}
-                                    <a href="{{ route('admin.courses.show', $course) }}"
-                                       class="flex items-center gap-3 px-4 py-2 text-[13px] text-gray-700 hover:bg-gray-50">
-                                        <svg class="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-                                        </svg>
-                                        Penelusuran
-                                    </a>
-
-                                    {{-- Ubah --}}
+                                    {{-- Update: Edit --}}
                                     <a href="{{ route('admin.courses.edit', $course) }}"
                                        class="flex items-center gap-3 px-4 py-2 text-[13px] text-gray-700 hover:bg-gray-50">
                                         <svg class="w-4 h-4 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -325,7 +405,7 @@
                                         Ubah Mata Kuliah
                                     </a>
 
-                                    {{-- Buat Cadangan --}}
+                                    {{-- Create: Duplikat --}}
                                     <form action="{{ route('admin.courses.duplicate', $course) }}" method="POST">
                                         @csrf
                                         <button type="submit"
@@ -339,7 +419,7 @@
 
                                     <div class="border-t border-gray-100 my-1"></div>
 
-                                    {{-- Hapus --}}
+                                    {{-- Delete: Hapus --}}
                                     <form action="{{ route('admin.courses.destroy', $course) }}" method="POST"
                                           onsubmit="return confirm('Yakin ingin menghapus mata kuliah ini?')">
                                         @csrf @method('DELETE')
@@ -389,7 +469,7 @@
                             <span class="text-gray-400">{{ $course->updated_at->format('H:i') }}</span>
                         </td>
 
-                        {{-- AKSI — List Manajemen (tanpa Situs Mata Kuliah) --}}
+                        {{-- AKSI — List Manajemen (CRUD: View, Edit, Duplicate, Delete) --}}
                         <td class="px-4 py-3.5">
                             <div x-data="{ open: false }" class="relative inline-block">
                                 <button @click="open = !open"
@@ -400,18 +480,19 @@
                                     </svg>
                                 </button>
                                 <div x-show="open" @click.outside="open = false" x-cloak
-                                     class="absolute right-0 mt-1 w-48 bg-white rounded-xl shadow-xl border border-gray-100 py-1.5 z-20">
+                                     class="absolute right-0 mt-1 w-52 bg-white rounded-xl shadow-xl border border-gray-100 py-1.5 z-20">
 
-                                    {{-- Penelusuran --}}
+                                    {{-- Read: Lihat Detail --}}
                                     <a href="{{ route('admin.courses.show', $course) }}"
                                        class="flex items-center gap-3 px-4 py-2 text-[13px] text-gray-700 hover:bg-gray-50">
                                         <svg class="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
                                         </svg>
-                                        Penelusuran
+                                        Lihat Detail
                                     </a>
 
-                                    {{-- Ubah --}}
+                                    {{-- Update: Edit --}}
                                     <a href="{{ route('admin.courses.edit', $course) }}"
                                        class="flex items-center gap-3 px-4 py-2 text-[13px] text-gray-700 hover:bg-gray-50">
                                         <svg class="w-4 h-4 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -420,7 +501,7 @@
                                         Ubah Mata Kuliah
                                     </a>
 
-                                    {{-- Buat Cadangan --}}
+                                    {{-- Create: Duplikat --}}
                                     <form action="{{ route('admin.courses.duplicate', $course) }}" method="POST">
                                         @csrf
                                         <button type="submit"
@@ -434,7 +515,7 @@
 
                                     <div class="border-t border-gray-100 my-1"></div>
 
-                                    {{-- Hapus --}}
+                                    {{-- Delete: Hapus --}}
                                     <form action="{{ route('admin.courses.destroy', $course) }}" method="POST"
                                           onsubmit="return confirm('Yakin ingin menghapus mata kuliah ini?')">
                                         @csrf @method('DELETE')
@@ -481,14 +562,12 @@
                 Menampilkan {{ $courses->firstItem() }} s.d. {{ $courses->lastItem() }} dari total {{ $courses->total() }}
             </span>
             <div class="flex items-center gap-1">
-                {{-- First --}}
                 <a href="{{ $courses->url(1) }}"
                    class="p-1.5 rounded-lg border border-gray-200 text-gray-500 hover:bg-gray-50 transition-colors {{ $courses->onFirstPage() ? 'opacity-30 pointer-events-none' : '' }}">
                     <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 19l-7-7 7-7m8 14l-7-7 7-7"/>
                     </svg>
                 </a>
-                {{-- Prev --}}
                 <a href="{{ $courses->previousPageUrl() ?? '#' }}"
                    class="p-1.5 rounded-lg border border-gray-200 text-gray-500 hover:bg-gray-50 transition-colors {{ $courses->onFirstPage() ? 'opacity-30 pointer-events-none' : '' }}">
                     <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -506,14 +585,12 @@
                     </a>
                 @endforeach
 
-                {{-- Next --}}
                 <a href="{{ $courses->nextPageUrl() ?? '#' }}"
                    class="p-1.5 rounded-lg border border-gray-200 text-gray-500 hover:bg-gray-50 transition-colors {{ !$courses->hasMorePages() ? 'opacity-30 pointer-events-none' : '' }}">
                     <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
                     </svg>
                 </a>
-                {{-- Last --}}
                 <a href="{{ $courses->url($courses->lastPage()) }}"
                    class="p-1.5 rounded-lg border border-gray-200 text-gray-500 hover:bg-gray-50 transition-colors {{ !$courses->hasMorePages() ? 'opacity-30 pointer-events-none' : '' }}">
                     <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -530,6 +607,80 @@
         </div>
         @endif
 
+    </div>
+</div>
+
+{{-- ══ Modal Import Mata Kuliah ══ --}}
+<div id="importCoursesModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md mx-4 p-6">
+        <div class="flex items-center justify-between mb-4">
+            <h3 class="text-base font-bold text-gray-900">Import Mata Kuliah</h3>
+            <button onclick="document.getElementById('importCoursesModal').classList.add('hidden')"
+                    class="text-gray-400 hover:text-gray-600">
+                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+            </button>
+        </div>
+        <form action="{{ route('admin.courses.import') }}" method="POST" enctype="multipart/form-data">
+            @csrf
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-xs font-semibold text-gray-600 mb-1.5">File CSV / Excel</label>
+                    <input type="file" name="file" accept=".csv,.xlsx,.xls"
+                           class="w-full text-sm text-gray-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-600 hover:file:bg-blue-100 border border-gray-200 rounded-lg p-1">
+                    <p class="mt-1 text-xs text-gray-400">Format yang didukung: .csv, .xlsx, .xls</p>
+                </div>
+                <div class="flex justify-end gap-2 pt-2">
+                    <button type="button"
+                            onclick="document.getElementById('importCoursesModal').classList.add('hidden')"
+                            class="btn-secondary text-sm">Batal</button>
+                    <button type="submit" class="btn-primary text-sm">
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
+                        </svg>
+                        Import
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+{{-- ══ Modal Import Daftar Pengguna ══ --}}
+<div id="importUsersModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md mx-4 p-6">
+        <div class="flex items-center justify-between mb-4">
+            <h3 class="text-base font-bold text-gray-900">Import Daftar Pengguna</h3>
+            <button onclick="document.getElementById('importUsersModal').classList.add('hidden')"
+                    class="text-gray-400 hover:text-gray-600">
+                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+            </button>
+        </div>
+        <form action="{{ route('admin.users.import') }}" method="POST" enctype="multipart/form-data">
+            @csrf
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-xs font-semibold text-gray-600 mb-1.5">File CSV / Excel</label>
+                    <input type="file" name="file" accept=".csv,.xlsx,.xls"
+                           class="w-full text-sm text-gray-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-purple-50 file:text-purple-600 hover:file:bg-purple-100 border border-gray-200 rounded-lg p-1">
+                    <p class="mt-1 text-xs text-gray-400">Format yang didukung: .csv, .xlsx, .xls</p>
+                </div>
+                <div class="flex justify-end gap-2 pt-2">
+                    <button type="button"
+                            onclick="document.getElementById('importUsersModal').classList.add('hidden')"
+                            class="btn-secondary text-sm">Batal</button>
+                    <button type="submit" class="btn-primary text-sm">
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
+                        </svg>
+                        Import
+                    </button>
+                </div>
+            </div>
+        </form>
     </div>
 </div>
 @endsection

@@ -6,33 +6,17 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Validation\Rule;
 
 class UserController extends Controller
 {
     public function index(Request $request)
     {
-        $filters = $request->only(['keyword', 'role', 'is_active']);
-        $perPage = (int) $request->get('per_page', 10);
+        $users = User::when($request->keyword, fn($q, $v) => $q->where('name', 'like', "%{$v}%")->orWhere('email', 'like', "%{$v}%"))
+                     ->when($request->role, fn($q, $v) => $q->where('role', $v))
+                     ->orderBy('name')
+                     ->paginate((int) $request->get('per_page', 10));
 
-        $query = User::query();
-
-        if (!empty($filters['keyword'])) {
-            $query->where(function ($q) use ($filters) {
-                $q->where('name', 'like', "%{$filters['keyword']}%")
-                  ->orWhere('email', 'like', "%{$filters['keyword']}%");
-            });
-        }
-        if (isset($filters['role']) && $filters['role'] !== '') {
-            $query->where('role', $filters['role']);
-        }
-        if (isset($filters['is_active']) && $filters['is_active'] !== '') {
-            $query->where('is_active', (bool) $filters['is_active']);
-        }
-
-        $users = $query->orderBy('name')->paginate($perPage)->withQueryString();
-
-        return view('admin.users.index', compact('users', 'filters'));
+        return view('admin.users.index', compact('users'));
     }
 
     public function create()
@@ -43,27 +27,20 @@ class UserController extends Controller
     public function store(Request $request)
     {
         $data = $request->validate([
-            'name'       => 'required|string|max:255',
-            'email'      => 'required|email|unique:users,email',
-            'password'   => 'required|min:8|confirmed',
-            'role'       => 'required|in:admin,teacher,student',
-            'phone'      => 'nullable|string|max:20',
-            'department' => 'nullable|string|max:255',
-            'is_active'  => 'boolean',
+            'name'     => 'required|string|max:255',
+            'email'    => 'required|email|unique:users,email',
+            'password' => 'required|string|min:8|confirmed',
+            'role'     => 'required|in:admin,teacher,student',
         ]);
 
-        $data['password']  = Hash::make($data['password']);
-        $data['is_active'] = $request->boolean('is_active', true);
-
+        $data['password'] = Hash::make($data['password']);
         User::create($data);
 
-        return redirect()->route('admin.users.index')
-            ->with('success', "Pengguna \"{$data['name']}\" berhasil dibuat.");
+        return redirect()->route('admin.users.index')->with('success', 'Pengguna berhasil dibuat.');
     }
 
     public function show(User $user)
     {
-        $user->load(['enrollments.course', 'teachingCourses']);
         return view('admin.users.show', compact('user'));
     }
 
@@ -75,33 +52,96 @@ class UserController extends Controller
     public function update(Request $request, User $user)
     {
         $data = $request->validate([
-            'name'       => 'required|string|max:255',
-            'email'      => ['required', 'email', Rule::unique('users')->ignore($user->id)],
-            'password'   => 'nullable|min:8|confirmed',
-            'role'       => 'required|in:admin,teacher,student',
-            'phone'      => 'nullable|string|max:20',
-            'department' => 'nullable|string|max:255',
-            'is_active'  => 'boolean',
+            'name'  => 'required|string|max:255',
+            'email' => 'required|email|unique:users,email,' . $user->id,
+            'role'  => 'required|in:admin,teacher,student',
         ]);
 
-        if (!empty($data['password'])) {
-            $data['password'] = Hash::make($data['password']);
-        } else {
-            unset($data['password']);
+        if ($request->filled('password')) {
+            $request->validate(['password' => 'string|min:8|confirmed']);
+            $data['password'] = Hash::make($request->password);
         }
 
-        $data['is_active'] = $request->boolean('is_active');
         $user->update($data);
 
-        return redirect()->route('admin.users.index')
-            ->with('success', "Pengguna \"{$user->name}\" berhasil diperbarui.");
+        return redirect()->route('admin.users.index')->with('success', 'Pengguna berhasil diperbarui.');
     }
 
     public function destroy(User $user)
     {
-        $name = $user->name;
         $user->delete();
-        return redirect()->route('admin.users.index')
-            ->with('success', "Pengguna \"{$name}\" berhasil dihapus.");
+        return redirect()->route('admin.users.index')->with('success', 'Pengguna berhasil dihapus.');
+    }
+
+    /**
+     * Import Daftar Pengguna dari file CSV / Excel
+     *
+     * POST /admin/users/import
+     */
+    public function import(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|file|mimes:csv,xlsx,xls|max:5120',
+        ]);
+
+        $file      = $request->file('file');
+        $extension = strtolower($file->getClientOriginalExtension());
+        $path      = $file->getRealPath();
+
+        $imported = 0;
+        $skipped  = 0;
+        $errors   = [];
+
+        if ($extension === 'csv') {
+            $handle = fopen($path, 'r');
+            $header = fgetcsv($handle); // skip header
+
+            // Hapus BOM jika ada
+            if ($header && str_starts_with($header[0], "\xEF\xBB\xBF")) {
+                $header[0] = substr($header[0], 3);
+            }
+
+            $lineNo = 1;
+            while (($row = fgetcsv($handle)) !== false) {
+                $lineNo++;
+                try {
+                    // Expected columns: name, email, role, password (optional)
+                    $name  = trim($row[0] ?? '');
+                    $email = trim($row[1] ?? '');
+                    $role  = trim($row[2] ?? 'student');
+
+                    if (empty($name) || empty($email)) { $skipped++; continue; }
+                    if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+                        $errors[] = "Baris {$lineNo}: Email tidak valid ({$email})";
+                        continue;
+                    }
+                    if (!in_array($role, ['admin', 'teacher', 'student'])) {
+                        $role = 'student';
+                    }
+                    if (User::where('email', $email)->exists()) {
+                        $skipped++;
+                        continue;
+                    }
+
+                    User::create([
+                        'name'     => $name,
+                        'email'    => $email,
+                        'role'     => $role,
+                        'password' => Hash::make($row[3] ?? 'password123'),
+                    ]);
+                    $imported++;
+                } catch (\Exception $e) {
+                    $errors[] = "Baris {$lineNo}: " . $e->getMessage();
+                }
+            }
+            fclose($handle);
+        }
+
+        $message = "{$imported} pengguna berhasil diimpor.";
+        if ($skipped)        $message .= " {$skipped} baris dilewati.";
+        if (count($errors))  $message .= " " . count($errors) . " baris gagal.";
+
+        return redirect()->route('admin.courses.index')
+            ->with('success', $message);
     }
 }

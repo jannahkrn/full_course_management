@@ -7,14 +7,12 @@ use Illuminate\Support\Facades\{DB, Storage};
 use Illuminate\Http\UploadedFile;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Str;
 
 class CourseService
 {
     // ─── Listing & Search ─────────────────────────────────────────────
 
-    /**
-     * Get paginated course list with advanced filters (Admin – Standard View).
-     */
     public function listForAdmin(array $filters, int $perPage = 10): LengthAwarePaginator
     {
         $query = Course::with(['category', 'teachers', 'enrollments'])
@@ -29,9 +27,6 @@ class CourseService
         return $query->paginate($perPage);
     }
 
-    /**
-     * Management view – includes teacher(s) and timestamps.
-     */
     public function listForManagement(array $filters, int $perPage = 10): LengthAwarePaginator
     {
         $query = Course::with(['teachers', 'enrollments'])
@@ -43,9 +38,6 @@ class CourseService
                      ->paginate($perPage);
     }
 
-    /**
-     * Catalog view for teacher – shows their own courses.
-     */
     public function catalogForTeacher(User $teacher, array $filters, int $perPage = 10): LengthAwarePaginator
     {
         $query = Course::with(['category', 'enrollments'])
@@ -63,9 +55,6 @@ class CourseService
         return $query->paginate($perPage);
     }
 
-    /**
-     * Student's enrolled course list.
-     */
     public function listForStudent(User $student, array $filters, int $perPage = 10): LengthAwarePaginator
     {
         $query = Course::with(['category', 'teachers'])
@@ -98,23 +87,20 @@ class CourseService
         if (!empty($filters['category_id'])) {
             $query->byCategory($filters['category_id']);
         }
-        if (isset($filters['language']) && $filters['language'] !== 'Semua') {
+        if (!empty($filters['language'])) {
             $query->byLanguage($filters['language']);
         }
-        if (isset($filters['access_type']) && $filters['access_type'] !== 'Semua') {
+        if (!empty($filters['access_type'])) {
             $query->where('access_type', $filters['access_type']);
         }
         if (isset($filters['is_registered']) && $filters['is_registered'] !== '') {
-            $query->where('is_registered', filter_var($filters['is_registered'], FILTER_VALIDATE_BOOLEAN));
+            $query->where('is_registered', (bool) $filters['is_registered']);
         }
         if (isset($filters['is_allowed']) && $filters['is_allowed'] !== '') {
-            $query->where('is_allowed', filter_var($filters['is_allowed'], FILTER_VALIDATE_BOOLEAN));
+            $query->where('is_allowed', (bool) $filters['is_allowed']);
         }
         if (isset($filters['allow_unsubscribe']) && $filters['allow_unsubscribe'] !== '') {
-            $query->where('allow_unsubscribe', filter_var($filters['allow_unsubscribe'], FILTER_VALIDATE_BOOLEAN));
-        }
-        if (isset($filters['is_active'])) {
-            $query->where('is_active', filter_var($filters['is_active'], FILTER_VALIDATE_BOOLEAN));
+            $query->where('allow_unsubscribe', (bool) $filters['allow_unsubscribe']);
         }
     }
 
@@ -132,17 +118,15 @@ class CourseService
 
             $course = Course::create($data);
 
-            // Attach teachers
             if (!empty($teacherIds)) {
-                $this->syncTeachers($course, $teacherIds);
+                $pivotData = [];
+                foreach ($teacherIds as $i => $id) {
+                    $pivotData[$id] = ['role' => $i === 0 ? 'primary' : 'co_teacher', 'assigned_at' => now()];
+                }
+                $course->teachers()->sync($pivotData);
             }
 
-            // If template course given, clone its sessions
-            if (!empty($data['template_course_id'])) {
-                $this->cloneSessionsFromTemplate($course, $data['template_course_id']);
-            }
-
-            return $course->load(['category', 'teachers']);
+            return $course;
         });
     }
 
@@ -150,7 +134,6 @@ class CourseService
     {
         return DB::transaction(function () use ($course, $data, $thumbnail) {
             if ($thumbnail) {
-                // Remove old thumbnail
                 if ($course->thumbnail) {
                     Storage::disk('public')->delete($course->thumbnail);
                 }
@@ -163,10 +146,14 @@ class CourseService
             $course->update($data);
 
             if ($teacherIds !== null) {
-                $this->syncTeachers($course, $teacherIds);
+                $pivotData = [];
+                foreach ($teacherIds as $i => $id) {
+                    $pivotData[$id] = ['role' => $i === 0 ? 'primary' : 'co_teacher', 'assigned_at' => now()];
+                }
+                $course->teachers()->sync($pivotData);
             }
 
-            return $course->fresh(['category', 'teachers', 'enrollments']);
+            return $course->fresh();
         });
     }
 
@@ -180,101 +167,49 @@ class CourseService
         });
     }
 
-    public function duplicate(Course $source): Course
+    public function duplicate(Course $course): Course
     {
-        return DB::transaction(function () use ($source) {
-            $source->load(['teachers', 'sessions.materials', 'sessions.exercises']);
+        return DB::transaction(function () use ($course) {
+            $new = $course->replicate(['slug', 'published_at']);
+            $new->title = "Salinan dari {$course->title}";
+            $new->slug  = Str::slug($new->title) . '-' . Str::random(5);
+            $new->is_active = false;
+            $new->save();
 
-            $newCourse = $source->replicate(['slug', 'code', 'published_at']);
-            $newCourse->title     = "Salinan - {$source->title}";
-            $newCourse->is_active = false;
-            $newCourse->save();
+            // Salin relasi guru
+            foreach ($course->teachers as $teacher) {
+                $new->teachers()->attach($teacher->id, [
+                    'role'        => $teacher->pivot->role,
+                    'assigned_at' => now(),
+                ]);
+            }
 
-            // Sync same teachers
-            $teacherIds = $source->teachers->pluck('id')->toArray();
-            $this->syncTeachers($newCourse, $teacherIds);
-
-            // Clone sessions
-            $this->cloneSessionsFromTemplate($newCourse, $source->id);
-
-            return $newCourse->load(['category', 'teachers']);
+            return $new;
         });
     }
 
-    // ─── Teacher Management ───────────────────────────────────────────
-
-    public function syncTeachers(Course $course, array $userIds): void
-    {
-        $pivotData = [];
-        foreach ($userIds as $index => $userId) {
-            $pivotData[$userId] = [
-                'role'        => $index === 0 ? 'primary' : 'co_teacher',
-                'assigned_at' => now(),
-            ];
-        }
-        $course->teachers()->sync($pivotData);
-    }
-
-    // ─── Template cloning ─────────────────────────────────────────────
-
-    private function cloneSessionsFromTemplate(Course $target, int $templateId): void
-    {
-        $template = Course::with(['sessions.materials', 'sessions.exercises'])->find($templateId);
-        if (!$template) return;
-
-        foreach ($template->sessions as $session) {
-            $newSession = $target->sessions()->create([
-                'title'       => $session->title,
-                'description' => $session->description,
-                'order'       => $session->order,
-                'is_active'   => $session->is_active,
-            ]);
-
-            foreach ($session->materials as $material) {
-                $newSession->materials()->create($material->only([
-                    'title', 'description', 'type', 'file_url', 'order', 'is_active',
-                ]));
-            }
-
-            foreach ($session->exercises as $exercise) {
-                $newSession->exercises()->create($exercise->only([
-                    'title', 'description', 'type', 'duration_minutes',
-                    'max_score', 'passing_score', 'order', 'is_active',
-                ]));
-            }
-        }
-    }
-
-    // ─── Session CRUD ─────────────────────────────────────────────────
-
-    public function createSession(Course $course, array $data): CourseSession
-    {
-        if (!isset($data['order'])) {
-            $data['order'] = $course->sessions()->max('order') + 1;
-        }
-        return $course->sessions()->create($data);
-    }
-
-    public function reorderSessions(Course $course, array $orderedIds): void
-    {
-        DB::transaction(function () use ($course, $orderedIds) {
-            foreach ($orderedIds as $index => $sessionId) {
-                $course->sessions()->where('id', $sessionId)->update(['order' => $index + 1]);
-            }
-        });
-    }
-
-    // ─── Publish / Unpublish ──────────────────────────────────────────
-
-    public function publish(Course $course): Course
+    public function publish(Course $course): void
     {
         $course->update(['published_at' => now(), 'is_active' => true]);
-        return $course;
     }
 
-    public function unpublish(Course $course): Course
+    public function unpublish(Course $course): void
     {
         $course->update(['published_at' => null]);
-        return $course;
+    }
+
+    /**
+     * Buat mata kuliah dari baris data import (CSV/Excel).
+     * Hanya membutuhkan data minimal; field lain menggunakan default.
+     */
+    public function createFromImport(array $row): Course
+    {
+        return Course::create([
+            'title'    => $row['title'],
+            'code'     => $row['code'] ?? null,
+            'language' => $row['language'] ?? 'en',
+            'slug'     => Str::slug($row['title']) . '-' . Str::random(5),
+            'is_active' => true,
+        ]);
     }
 }

@@ -59,6 +59,10 @@ Route::prefix('admin')
     Route::post('courses/{course}/publish',       [AdminCourseController::class, 'publish'])  ->name('courses.publish');
     Route::post('courses/{course}/unpublish',     [AdminCourseController::class, 'unpublish'])->name('courses.unpublish');
 
+    // ── Courses Export / Import ────────────────────────────────────────
+    Route::get('courses/export',                  [AdminCourseController::class, 'export'])   ->name('courses.export');
+    Route::post('courses/import',                 [AdminCourseController::class, 'import'])   ->name('courses.import');
+
     // ── Enrollments ───────────────────────────────────────────────────
     Route::get('courses/{course}/enrollments',            [AdminEnrollmentController::class, 'index'])         ->name('enrollments.index');
     Route::post('courses/{course}/enrollments',           [AdminEnrollmentController::class, 'enroll'])        ->name('enrollments.enroll');
@@ -71,6 +75,7 @@ Route::prefix('admin')
 
     // ── Users ─────────────────────────────────────────────────────────
     Route::resource('users', AdminUserController::class);
+    Route::post('users/import',                   [AdminUserController::class, 'import'])     ->name('users.import');
 });
 
 /*
