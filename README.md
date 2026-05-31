@@ -170,7 +170,7 @@ Buka browser: `http://localhost:8000`
 |---------|-------------------------|-----------|
 | Admin   | admin@smartexam.id      | password  |
 | Teacher | albert@smartexam.id    | password  |
-| Student | madeleine@smartexam   | password  |
+| Student | madeleine@smartexam.id  | password  |
 
 ---
 
