@@ -14,7 +14,6 @@
 
     <div class="w-full max-w-md">
 
-        {{-- Logo --}}
         <div class="flex items-center justify-center gap-2.5 mb-8">
             <div class="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center">
                 <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
@@ -25,7 +24,6 @@
             <span class="text-2xl font-bold text-gray-900">Smart<span class="text-blue-600">Exam</span></span>
         </div>
 
-        {{-- Card --}}
         <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-8">
             <h1 class="text-xl font-bold text-gray-900 mb-1">Selamat Datang</h1>
             <p class="text-sm text-gray-500 mb-6">Masuk ke akun Smart Exam Anda</p>
