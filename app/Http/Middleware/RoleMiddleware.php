@@ -16,13 +16,23 @@ class RoleMiddleware
         $user = $request->user();
 
         if (!$user) {
-            return response()->json(['message' => 'Unauthenticated.'], 401);
+            if ($request->expectsJson()) {
+                return response()->json(['message' => 'Unauthenticated.'], 401);
+            }
+            return redirect()->route('login');
         }
 
         if (!in_array($user->role, $roles, true)) {
-            return response()->json([
-                'message' => 'Anda tidak memiliki akses ke halaman ini.',
-            ], 403);
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'message' => 'Anda tidak memiliki akses ke halaman ini.',
+                ], 403);
+            }
+            return match($user->role) {
+                'admin'   => redirect()->route('admin.courses.index'),
+                'teacher' => redirect()->route('teacher.courses.index'),
+                default   => redirect()->route('student.courses.index'),
+            };
         }
 
         return $next($request);
