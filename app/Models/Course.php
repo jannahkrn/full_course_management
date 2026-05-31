@@ -42,7 +42,6 @@ class Course extends Model
         });
     }
 
-    // ─── Scopes ───────────────────────────────────────────────────────
     public function scopeActive($query)     { return $query->where('is_active', true); }
     public function scopePublished($query)  { return $query->whereNotNull('published_at'); }
     public function scopeByLanguage($query, $lang) { return $query->where('language', $lang); }
@@ -54,8 +53,7 @@ class Course extends Model
               ->orWhere('code', 'like', "%{$keyword}%");
         });
     }
-
-    // ─── Relations ────────────────────────────────────────────────────
+    
     public function category(): BelongsTo
     {
         return $this->belongsTo(CourseCategory::class, 'category_id');
@@ -111,7 +109,6 @@ class Course extends Model
         return $this->hasMany(CourseActivityLog::class);
     }
 
-    // ─── Accessors ────────────────────────────────────────────────────
     public function getEnrolledCountAttribute(): int
     {
         return $this->enrollments()->where('status', 'active')->count();
