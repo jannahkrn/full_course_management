@@ -40,7 +40,6 @@
 <div class="flex flex-col h-screen overflow-hidden">
 
     <header class="bg-white border-b border-gray-200 flex items-center justify-between px-5 h-14 flex-shrink-0 z-40">
-
         <a href="{{ url('/') }}" class="flex items-center flex-shrink-0">
             <img src="{{ asset('assets/logo.png') }}"
                  alt="Smart Exam"
@@ -131,18 +130,19 @@
         <aside class="flex-shrink-0 bg-white border-r border-gray-200 flex flex-col transition-all duration-300 z-30"
                :class="sidebarOpen ? 'w-[220px]' : 'w-[52px]'">
 
-            <nav class="flex-1 overflow-y-auto px-2.5 py-3 space-y-0.5 overflow-x-hidden">
+            <nav class="flex-1 overflow-y-auto px-2.5 py-3 space-y-0.5 overflow-x-hidden whitespace-nowrap">
+                <div class="px-2.5 pb-2 border-b border-gray-100 mb-2 flex justify-start">
+                    <button @click="sidebarOpen = !sidebarOpen" 
+                            class="flex items-center gap-2 text-gray-500 hover:text-blue-600 font-bold transition-colors focus:outline-none">
+                        <svg class="w-4 h-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+                        </svg>
+                        <span x-show="sidebarOpen" class="text-[11px] letter-spacing:0.08em uppercase">Menu</span>
+                    </button>
+                </div>
+
                 @yield('sidebar-nav')
             </nav>
-
-            <div class="p-2.5 border-t border-gray-100">
-                <button @click="sidebarOpen = !sidebarOpen" class="nav-item w-full justify-center" style="padding:8px;">
-                    <svg class="transition-transform" :class="sidebarOpen ? '' : 'rotate-180'"
-                         width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 19l-7-7 7-7m8 14l-7-7 7-7"/>
-                    </svg>
-                </button>
-            </div>
         </aside>
 
         <div class="flex-1 flex flex-col overflow-hidden">
