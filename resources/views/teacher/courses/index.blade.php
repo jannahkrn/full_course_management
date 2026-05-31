@@ -67,7 +67,6 @@
         </div>
     </div>
 
-    {{-- Filter --}}
     <div class="bg-white rounded-xl border border-gray-200 p-4">
         <form method="GET" action="{{ route('teacher.courses.index') }}">
             <div class="flex gap-2.5 flex-wrap items-end">
@@ -101,7 +100,6 @@
                 </button>
             </div>
 
-            {{-- Active filters --}}
             @if(array_filter($filters))
             <div class="flex flex-wrap gap-2 mt-3 pt-3 border-t border-gray-100">
                 <span class="text-xs text-gray-500 self-center">Difilter berdasarkan:</span>
@@ -129,7 +127,6 @@
         </form>
     </div>
 
-    {{-- List --}}
     <div class="bg-white rounded-xl border border-gray-200 overflow-hidden">
         <div class="px-5 py-3 flex items-center justify-between border-b border-gray-100">
             <span class="text-sm font-semibold text-gray-700">List</span>
@@ -138,7 +135,6 @@
 
         @forelse($courses as $course)
         <div class="flex items-center gap-4 px-5 py-4 border-b border-gray-50 hover:bg-gray-50/50 transition-colors last:border-0">
-            {{-- Checkbox + Thumbnail --}}
             <input type="checkbox" class="rounded border-gray-300 flex-shrink-0">
             <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center flex-shrink-0 overflow-hidden">
                 @if($course->thumbnail)
@@ -148,7 +144,6 @@
                 @endif
             </div>
 
-            {{-- Info --}}
             <div class="flex-1 min-w-0">
                 <div class="flex items-center gap-2 mb-0.5">
                     <a href="{{ route('teacher.courses.show', $course) }}"
@@ -170,7 +165,6 @@
                 </div>
             </div>
 
-            {{-- Toggle aktif --}}
             <div class="flex items-center gap-3 flex-shrink-0">
                 <div class="flex items-center gap-2">
                     <span class="text-xs text-gray-500">{{ $course->is_active ? 'Aktif' : 'Nonaktif' }}</span>
