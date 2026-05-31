@@ -34,7 +34,8 @@ class CourseController extends Controller
 
     public function unenroll(Course $course)
     {
-        $this->enrollmentService->unenrollUser($course, auth()->id());
+        $this->enrollmentService->selfUnenroll($course, auth()->user());
+
         return redirect()->route('student.courses.index')
             ->with('success', "Kamu telah keluar dari mata kuliah \"{$course->title}\".");
     }
