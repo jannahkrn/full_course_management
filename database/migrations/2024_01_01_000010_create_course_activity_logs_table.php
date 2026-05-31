@@ -12,8 +12,8 @@ return new class extends Migration
             $table->id();
             $table->foreignId('course_id')->constrained('courses')->cascadeOnDelete();
             $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
-            $table->string('action'); // visited, material_viewed, exercise_submitted, enrolled, etc.
-            $table->morphs('loggable'); // polymorphic: material, exercise, session
+            $table->string('action'); 
+            $table->morphs('loggable'); 
             $table->json('meta')->nullable();
             $table->timestamp('accessed_at')->useCurrent();
             $table->timestamps();

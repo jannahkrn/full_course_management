@@ -15,27 +15,23 @@ return new class extends Migration
             $table->string('code')->unique()->nullable();
             $table->foreignId('category_id')->nullable()->constrained('course_categories')->nullOnDelete();
             $table->text('description')->nullable();
-            $table->string('language')->default('en'); // en, id, etc.
+            $table->string('language')->default('en'); 
             $table->string('department')->nullable();
             $table->string('department_url')->nullable();
             $table->string('thumbnail')->nullable();
             $table->string('video_url')->nullable();
             $table->foreignId('template_course_id')->nullable()->constrained('courses')->nullOnDelete();
 
-            // Access settings
             $table->enum('access_type', ['public', 'private', 'restricted'])->default('private');
-            $table->boolean('is_registered')->default(false);    // Terdaftar
-            $table->boolean('is_allowed')->default(true);        // Tidak Terdaftar Diizinkan
+            $table->boolean('is_registered')->default(false);    
+            $table->boolean('is_allowed')->default(true);        
 
-            // Subscription settings
             $table->enum('subscription_type', ['allowed', 'teacher_only'])->default('allowed');
-            $table->boolean('allow_unsubscribe')->default(true); // Boleh berhenti langganan
-            $table->integer('storage_limit_mb')->nullable();     // Ruang Penyimpanan
+            $table->boolean('allow_unsubscribe')->default(true); 
+            $table->integer('storage_limit_mb')->nullable();     
 
-            // Special course flag
-            $table->boolean('is_special')->default(false);       // Mata Kuliah Khusus
+            $table->boolean('is_special')->default(false);       
 
-            // Tags stored as JSON
             $table->json('tags')->nullable();
 
             $table->boolean('is_active')->default(true);
