@@ -73,75 +73,82 @@ class UserController extends Controller
         return redirect()->route('admin.users.index')->with('success', 'Pengguna berhasil dihapus.');
     }
 
-    /**
-     * Import Daftar Pengguna dari file CSV / Excel
-     *
-     * POST /admin/users/import
-     */
     public function import(Request $request)
     {
         $request->validate([
-            'file' => 'required|file|mimes:csv,xlsx,xls|max:5120',
+            'file' => 'required|file|mimes:csv,txt|max:5120',
+        ], [
+            'file.mimes' => 'File harus berformat CSV (.csv). Format Excel (.xlsx/.xls) belum didukung untuk import.',
         ]);
 
-        $file      = $request->file('file');
-        $extension = strtolower($file->getClientOriginalExtension());
-        $path      = $file->getRealPath();
+        $file   = $request->file('file');
+        $path   = $file->getRealPath();
 
         $imported = 0;
         $skipped  = 0;
         $errors   = [];
 
-        if ($extension === 'csv') {
-            $handle = fopen($path, 'r');
-            $header = fgetcsv($handle); // skip header
+        $handle = fopen($path, 'r');
 
-            // Hapus BOM jika ada
-            if ($header && str_starts_with($header[0], "\xEF\xBB\xBF")) {
-                $header[0] = substr($header[0], 3);
-            }
+        $header = fgetcsv($handle);
 
-            $lineNo = 1;
-            while (($row = fgetcsv($handle)) !== false) {
-                $lineNo++;
-                try {
-                    // Expected columns: name, email, role, password (optional)
-                    $name  = trim($row[0] ?? '');
-                    $email = trim($row[1] ?? '');
-                    $role  = trim($row[2] ?? 'student');
-
-                    if (empty($name) || empty($email)) { $skipped++; continue; }
-                    if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-                        $errors[] = "Baris {$lineNo}: Email tidak valid ({$email})";
-                        continue;
-                    }
-                    if (!in_array($role, ['admin', 'teacher', 'student'])) {
-                        $role = 'student';
-                    }
-                    if (User::where('email', $email)->exists()) {
-                        $skipped++;
-                        continue;
-                    }
-
-                    User::create([
-                        'name'     => $name,
-                        'email'    => $email,
-                        'role'     => $role,
-                        'password' => Hash::make($row[3] ?? 'password123'),
-                    ]);
-                    $imported++;
-                } catch (\Exception $e) {
-                    $errors[] = "Baris {$lineNo}: " . $e->getMessage();
-                }
-            }
-            fclose($handle);
+        if ($header && str_starts_with($header[0], "\xEF\xBB\xBF")) {
+            $header[0] = substr($header[0], 3);
         }
 
-        $message = "{$imported} pengguna berhasil diimpor.";
-        if ($skipped)        $message .= " {$skipped} baris dilewati.";
-        if (count($errors))  $message .= " " . count($errors) . " baris gagal.";
+        $lineNo = 1;
+        while (($row = fgetcsv($handle)) !== false) {
+            $lineNo++;
 
-        return redirect()->route('admin.courses.index')
+            if (empty(array_filter($row))) {
+                $skipped++;
+                continue;
+            }
+
+            $name     = trim($row[0] ?? '');
+            $email    = trim($row[1] ?? '');
+            $role     = trim($row[2] ?? 'student');
+            $password = trim($row[3] ?? '') ?: 'password123';
+
+            if (empty($name) || empty($email)) {
+                $skipped++;
+                continue;
+            }
+
+            if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+                $errors[] = "Baris {$lineNo}: Email tidak valid ({$email})";
+                continue;
+            }
+
+            if (!in_array($role, ['admin', 'teacher', 'student'])) {
+                $role = 'student';
+            }
+
+            if (User::where('email', $email)->exists()) {
+                $skipped++;
+                continue;
+            }
+
+            try {
+                User::create([
+                    'name'     => $name,
+                    'email'    => $email,
+                    'role'     => $role,
+                    'password' => Hash::make($password),
+                ]);
+                $imported++;
+            } catch (\Exception $e) {
+                $errors[] = "Baris {$lineNo} (\"{$email}\"): " . $e->getMessage();
+            }
+        }
+
+        fclose($handle);
+
+        $message = "{$imported} pengguna berhasil diimpor.";
+        if ($skipped)       $message .= " {$skipped} baris dilewati.";
+        if (count($errors)) $message .= " " . count($errors) . " baris gagal.";
+
+        return redirect()->route('admin.users.index')
             ->with('success', $message);
     }
 }
