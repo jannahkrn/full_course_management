@@ -9,17 +9,14 @@
 @section('content')
 <div class="p-6 space-y-5">
 
-    {{-- ── Page Header ────────────────────────────────────────── --}}
     <div class="flex items-start justify-between gap-3 flex-wrap">
         <div>
             <h1 class="text-[22px] font-bold text-gray-900 leading-tight">Daftar Mata Kuliah</h1>
             <p class="text-sm text-gray-500 mt-1">Kelola seluruh mata kuliah di Smart Exam.</p>
         </div>
 
-        {{-- Action Buttons Group --}}
         <div class="flex items-center gap-2 flex-wrap">
 
-            {{-- Import / Export Dropdown --}}
             <div x-data="{ openIE: false }" class="relative">
                 <button @click="openIE = !openIE"
                         class="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg border border-gray-200 bg-white hover:bg-gray-50 text-sm font-medium text-gray-600 transition-colors">
@@ -36,7 +33,6 @@
 
                     <p class="px-4 pt-1 pb-1 text-[10px] font-bold text-gray-400 uppercase tracking-widest">Export Daftar Mata Kuliah</p>
 
-                    {{-- Export CSV --}}
                     <a href="{{ route('admin.courses.export', array_merge(request()->query(), ['format' => 'csv'])) }}"
                        class="flex items-center gap-3 px-4 py-2 text-[13px] text-gray-700 hover:bg-gray-50">
                         <svg class="w-4 h-4 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -45,7 +41,6 @@
                         Export ke CSV
                     </a>
 
-                    {{-- Export Excel --}}
                     <a href="{{ route('admin.courses.export', array_merge(request()->query(), ['format' => 'xlsx'])) }}"
                        class="flex items-center gap-3 px-4 py-2 text-[13px] text-gray-700 hover:bg-gray-50">
                         <svg class="w-4 h-4 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -57,7 +52,6 @@
                     <div class="border-t border-gray-100 my-1"></div>
                     <p class="px-4 pt-1 pb-1 text-[10px] font-bold text-gray-400 uppercase tracking-widest">Import</p>
 
-                    {{-- Import Courses --}}
                     <button type="button"
                             onclick="document.getElementById('importCoursesModal').classList.remove('hidden')"
                             class="w-full flex items-center gap-3 px-4 py-2 text-[13px] text-gray-700 hover:bg-gray-50">
@@ -67,7 +61,6 @@
                         Import Mata Kuliah
                     </button>
 
-                    {{-- Import Users List --}}
                     <button type="button"
                             onclick="document.getElementById('importUsersModal').classList.remove('hidden')"
                             class="w-full flex items-center gap-3 px-4 py-2 text-[13px] text-gray-700 hover:bg-gray-50">
@@ -79,7 +72,6 @@
                 </div>
             </div>
 
-            {{-- Tambah Pengguna ke Mata Kuliah --}}
             <a href="{{ route('admin.enrollments.add-users') }}"
                class="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg border border-gray-200 bg-white hover:bg-gray-50 text-sm font-medium text-gray-600 transition-colors">
                 <svg class="w-4 h-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -88,7 +80,6 @@
                 Tambah Pengguna ke Mata Kuliah
             </a>
 
-            {{-- Tambah Mata Kuliah --}}
             <a href="{{ route('admin.courses.create') }}" class="btn-primary">
                 <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/>
@@ -98,7 +89,6 @@
         </div>
     </div>
 
-    {{-- Flash Messages --}}
     @if(session('success'))
     <div class="p-4 bg-green-50 border border-green-200 rounded-xl text-sm text-green-700 flex items-center gap-2">
         <svg class="w-4 h-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -111,7 +101,6 @@
     <div class="p-4 bg-red-50 border border-red-200 rounded-xl text-sm text-red-700">{{ session('error') }}</div>
     @endif
 
-    {{-- ── Tabs ────────────────────────────────────────────────── --}}
     <div class="border-b border-gray-200">
         <nav class="flex gap-0">
             <a href="{{ route('admin.courses.index', array_merge(request()->except('view','page'), ['view' => 'standar'])) }}"
@@ -131,12 +120,10 @@
         </nav>
     </div>
 
-    {{-- ── Filter ──────────────────────────────────────────────── --}}
     <div class="bg-white rounded-xl border border-gray-200 p-4" x-data="{ showAdvanced: false }">
         <form method="GET" action="{{ route('admin.courses.index') }}" id="filterForm">
             <input type="hidden" name="view" value="{{ $view }}">
 
-            {{-- Basic row --}}
             <div class="flex gap-2.5 items-center">
                 <div class="flex-1 relative">
                     <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -160,7 +147,6 @@
                 </button>
             </div>
 
-            {{-- Advanced Search --}}
             <div x-show="showAdvanced" x-cloak class="mt-4 pt-4 border-t border-gray-100">
                 <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-3">Advanced Search</p>
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
@@ -237,10 +223,8 @@
         </form>
     </div>
 
-    {{-- ── Table ───────────────────────────────────────────────── --}}
     <div class="bg-white rounded-xl border border-gray-200 overflow-hidden">
 
-        {{-- Table toolbar --}}
         <div class="px-5 py-3 flex items-center justify-between border-b border-gray-100">
             <span class="text-sm font-semibold text-gray-700">List</span>
             <div class="flex items-center gap-2 text-sm text-gray-500">
@@ -270,7 +254,6 @@
                         </th>
 
                         @if($view === 'standar')
-                        {{-- ══ LIST STANDAR HEADERS ══ --}}
                         <th class="px-4 py-3 text-left text-[11px] font-bold text-gray-500 uppercase tracking-wider">Judul</th>
                         <th class="px-4 py-3 text-left">
                             <button class="flex items-center gap-1 text-[11px] font-bold text-gray-500 uppercase tracking-wider hover:text-gray-700">
@@ -307,7 +290,6 @@
                         <th class="px-4 py-3 text-left text-[11px] font-bold text-gray-500 uppercase tracking-wider">Aksi</th>
 
                         @else
-                        {{-- ══ LIST MANAJEMEN HEADERS ══ --}}
                         <th class="px-4 py-3 text-left text-[11px] font-bold text-gray-500 uppercase tracking-wider">Judul</th>
                         <th class="px-4 py-3 text-left text-[11px] font-bold text-gray-500 uppercase tracking-wider">Guru</th>
                         <th class="px-4 py-3 text-left">
@@ -339,7 +321,6 @@
                         </td>
 
                         @if($view === 'standar')
-                        {{-- ══ LIST STANDAR CELLS ══ --}}
                         <td class="px-4 py-3.5">
                             <div class="font-semibold text-gray-900 text-[13px]">{{ $course->title }}</div>
                             <div class="text-[11px] text-gray-400 font-medium uppercase tracking-wider mt-0.5">
@@ -373,7 +354,6 @@
                             @endif
                         </td>
 
-                        {{-- AKSI — List Standar (CRUD: View, Edit, Duplicate, Delete) --}}
                         <td class="px-4 py-3.5">
                             <div x-data="{ open: false }" class="relative inline-block">
                                 <button @click="open = !open"
@@ -386,7 +366,6 @@
                                 <div x-show="open" @click.outside="open = false" x-cloak
                                      class="absolute right-0 mt-1 w-52 bg-white rounded-xl shadow-xl border border-gray-100 py-1.5 z-20">
 
-                                    {{-- Read: Situs Mata Kuliah --}}
                                     <a href="{{ route('admin.courses.show', $course) }}"
                                        class="flex items-center gap-3 px-4 py-2 text-[13px] text-gray-700 hover:bg-gray-50">
                                         <svg class="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -396,7 +375,6 @@
                                         Lihat Detail
                                     </a>
 
-                                    {{-- Update: Edit --}}
                                     <a href="{{ route('admin.courses.edit', $course) }}"
                                        class="flex items-center gap-3 px-4 py-2 text-[13px] text-gray-700 hover:bg-gray-50">
                                         <svg class="w-4 h-4 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -405,7 +383,6 @@
                                         Ubah Mata Kuliah
                                     </a>
 
-                                    {{-- Create: Duplikat --}}
                                     <form action="{{ route('admin.courses.duplicate', $course) }}" method="POST">
                                         @csrf
                                         <button type="submit"
@@ -419,7 +396,6 @@
 
                                     <div class="border-t border-gray-100 my-1"></div>
 
-                                    {{-- Delete: Hapus --}}
                                     <form action="{{ route('admin.courses.destroy', $course) }}" method="POST"
                                           onsubmit="return confirm('Yakin ingin menghapus mata kuliah ini?')">
                                         @csrf @method('DELETE')
@@ -436,7 +412,6 @@
                         </td>
 
                         @else
-                        {{-- ══ LIST MANAJEMEN CELLS ══ --}}
                         <td class="px-4 py-3.5">
                             <div class="font-semibold text-gray-900 text-[13px]">{{ $course->title }}</div>
                             <div class="text-[11px] text-gray-400 font-medium uppercase tracking-wider mt-0.5">
@@ -469,7 +444,6 @@
                             <span class="text-gray-400">{{ $course->updated_at->format('H:i') }}</span>
                         </td>
 
-                        {{-- AKSI — List Manajemen (CRUD: View, Edit, Duplicate, Delete) --}}
                         <td class="px-4 py-3.5">
                             <div x-data="{ open: false }" class="relative inline-block">
                                 <button @click="open = !open"
@@ -482,7 +456,6 @@
                                 <div x-show="open" @click.outside="open = false" x-cloak
                                      class="absolute right-0 mt-1 w-52 bg-white rounded-xl shadow-xl border border-gray-100 py-1.5 z-20">
 
-                                    {{-- Read: Lihat Detail --}}
                                     <a href="{{ route('admin.courses.show', $course) }}"
                                        class="flex items-center gap-3 px-4 py-2 text-[13px] text-gray-700 hover:bg-gray-50">
                                         <svg class="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -492,7 +465,6 @@
                                         Lihat Detail
                                     </a>
 
-                                    {{-- Update: Edit --}}
                                     <a href="{{ route('admin.courses.edit', $course) }}"
                                        class="flex items-center gap-3 px-4 py-2 text-[13px] text-gray-700 hover:bg-gray-50">
                                         <svg class="w-4 h-4 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -501,7 +473,6 @@
                                         Ubah Mata Kuliah
                                     </a>
 
-                                    {{-- Create: Duplikat --}}
                                     <form action="{{ route('admin.courses.duplicate', $course) }}" method="POST">
                                         @csrf
                                         <button type="submit"
@@ -515,7 +486,6 @@
 
                                     <div class="border-t border-gray-100 my-1"></div>
 
-                                    {{-- Delete: Hapus --}}
                                     <form action="{{ route('admin.courses.destroy', $course) }}" method="POST"
                                           onsubmit="return confirm('Yakin ingin menghapus mata kuliah ini?')">
                                         @csrf @method('DELETE')
@@ -555,7 +525,6 @@
             </table>
         </div>
 
-        {{-- ── Pagination ─────────────────────────────────────── --}}
         @if($courses->hasPages())
         <div class="px-5 py-3.5 border-t border-gray-100 flex items-center justify-between">
             <span class="text-xs text-gray-500">
@@ -610,7 +579,6 @@
     </div>
 </div>
 
-{{-- ══ Modal Import Mata Kuliah ══ --}}
 <div id="importCoursesModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/40">
     <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md mx-4 p-6">
         <div class="flex items-center justify-between mb-4">
@@ -647,7 +615,6 @@
     </div>
 </div>
 
-{{-- ══ Modal Import Daftar Pengguna ══ --}}
 <div id="importUsersModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/40">
     <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md mx-4 p-6">
         <div class="flex items-center justify-between mb-4">
