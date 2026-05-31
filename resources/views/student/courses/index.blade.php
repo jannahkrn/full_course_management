@@ -3,14 +3,6 @@
 
 @section('sidebar-nav')
 
-    <div class="flex items-center gap-2 px-2 py-2 mb-1" x-show="sidebarOpen" x-cloak>
-        <svg class="w-4 h-4 text-gray-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
-        </svg>
-        <span class="text-sm font-semibold text-gray-700">Menu</span>
-    </div>
-    <div class="border-b border-gray-100 mb-2 mx-1" x-show="sidebarOpen" x-cloak></div>
-
     <div x-data="{ open: true }">
         <button @click="open = !open"
                 class="nav-item w-full text-left {{ request()->routeIs('student.courses.*') ? 'active' : '' }}">
