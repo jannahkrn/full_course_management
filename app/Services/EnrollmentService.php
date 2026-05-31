@@ -8,10 +8,7 @@ use Illuminate\Pagination\LengthAwarePaginator;
 
 class EnrollmentService
 {
-    /**
-     * Enroll one or multiple users into a course.
-     * Returns ['enrolled' => [...], 'already_enrolled' => [...]]
-     */
+
     public function enrollUsers(Course $course, array $userIds): array
     {
         $enrolled        = [];
@@ -45,9 +42,7 @@ class EnrollmentService
         return ['enrolled' => $enrolled, 'already_enrolled' => $alreadyEnrolled];
     }
 
-    /**
-     * Enroll users into multiple courses at once (Admin bulk enroll).
-     */
+
     public function bulkEnroll(array $userIds, array $courseIds): array
     {
         $results = [];
@@ -61,9 +56,6 @@ class EnrollmentService
         return $results;
     }
 
-    /**
-     * Unenroll (drop) a single user from a course.
-     */
     public function unenrollUser(Course $course, int $userId): Enrollment
     {
         $enrollment = Enrollment::where('course_id', $course->id)
@@ -79,9 +71,7 @@ class EnrollmentService
         return $enrollment;
     }
 
-    /**
-     * Student self-unenroll.
-     */
+
     public function selfUnenroll(Course $course, User $user): void
     {
         if (!$course->allow_unsubscribe) {
@@ -96,9 +86,6 @@ class EnrollmentService
         $enrollment->update(['status' => 'dropped', 'dropped_at' => now()]);
     }
 
-    /**
-     * Get paginated enrollment list for a course.
-     */
     public function getCourseEnrollments(Course $course, array $filters = [], int $perPage = 10): LengthAwarePaginator
     {
         $query = $course->enrollments()->with('user');
@@ -116,9 +103,7 @@ class EnrollmentService
         return $query->latest('enrolled_at')->paginate($perPage);
     }
 
-    /**
-     * Get all enrollments for a user (student dashboard).
-     */
+
     public function getUserEnrollments(User $user, string $status = 'active'): \Illuminate\Database\Eloquent\Collection
     {
         return $user->enrollments()->with(['course.category', 'course.teachers'])
@@ -127,9 +112,7 @@ class EnrollmentService
                     ->get();
     }
 
-    /**
-     * Mark enrollment as completed.
-     */
+
     public function completeEnrollment(Course $course, int $userId): Enrollment
     {
         $enrollment = Enrollment::where('course_id', $course->id)
