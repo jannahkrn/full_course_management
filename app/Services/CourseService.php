@@ -11,7 +11,6 @@ use Illuminate\Support\Str;
 
 class CourseService
 {
-    // ─── Listing & Search ─────────────────────────────────────────────
 
     public function listForAdmin(array $filters, int $perPage = 10): LengthAwarePaginator
     {
@@ -104,7 +103,6 @@ class CourseService
         }
     }
 
-    // ─── CRUD ─────────────────────────────────────────────────────────
 
     public function create(array $data, ?UploadedFile $thumbnail = null): Course
     {
@@ -176,7 +174,6 @@ class CourseService
             $new->is_active = false;
             $new->save();
 
-            // Salin relasi guru
             foreach ($course->teachers as $teacher) {
                 $new->teachers()->attach($teacher->id, [
                     'role'        => $teacher->pivot->role,
@@ -198,10 +195,6 @@ class CourseService
         $course->update(['published_at' => null]);
     }
 
-    /**
-     * Buat mata kuliah dari baris data import (CSV/Excel).
-     * Hanya membutuhkan data minimal; field lain menggunakan default.
-     */
     public function createFromImport(array $row): Course
     {
         return Course::create([
