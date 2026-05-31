@@ -10,7 +10,6 @@ class DatabaseSeeder extends Seeder
 {
     public function run(): void
     {
-        // ── Admin ─────────────────────────────────────────────────────
         $admin = User::create([
             'name'       => 'Super Admin',
             'email'      => 'admin@smartexam.id',
@@ -19,7 +18,6 @@ class DatabaseSeeder extends Seeder
             'is_active'  => true,
         ]);
 
-        // ── Teachers ──────────────────────────────────────────────────
         $teacher1 = User::create([
             'name'      => 'Albert Mandala, S. Pd',
             'email'     => 'albert@smartexam.id',
@@ -44,7 +42,6 @@ class DatabaseSeeder extends Seeder
             'is_active' => true,
         ]);
 
-        // ── Student ───────────────────────────────────────────────────
         $student = User::create([
             'name'      => 'Madeleine S',
             'email'     => 'madeleine@smartexam.id',
@@ -53,12 +50,10 @@ class DatabaseSeeder extends Seeder
             'is_active' => true,
         ]);
 
-        // ── Categories ────────────────────────────────────────────────
         $catProg  = CourseCategory::create(['name' => 'Pemrograman',  'slug' => 'pemrograman']);
         $catTeori = CourseCategory::create(['name' => 'Teori',        'slug' => 'teori']);
         $catProjek = CourseCategory::create(['name' => 'Projek',       'slug' => 'projek']);
 
-        // ── Courses ───────────────────────────────────────────────────
         $courses = [
             [
                 'title'       => 'AI for Beginners',
@@ -144,13 +139,11 @@ class DatabaseSeeder extends Seeder
 
             $course = Course::create($courseData);
 
-            // Attach teacher
             $course->teachers()->attach($teacher->id, [
                 'role'        => 'primary',
                 'assigned_at' => now(),
             ]);
 
-            // Enroll the demo student
             Enrollment::create([
                 'course_id'   => $course->id,
                 'user_id'     => $student->id,
@@ -158,7 +151,6 @@ class DatabaseSeeder extends Seeder
                 'enrolled_at' => now(),
             ]);
 
-            // Create a sample session
             $session = CourseSession::create([
                 'course_id'   => $course->id,
                 'title'       => 'Sesi 1 - Pengenalan ' . $course->title,
@@ -167,7 +159,6 @@ class DatabaseSeeder extends Seeder
                 'is_active'   => true,
             ]);
 
-            // Sample material
             $session->materials()->create([
                 'title'     => 'Materi Pengenalan',
                 'type'      => 'document',
@@ -175,7 +166,6 @@ class DatabaseSeeder extends Seeder
                 'is_active' => true,
             ]);
 
-            // Sample exercise
             $session->exercises()->create([
                 'title'      => 'Latihan 1',
                 'type'       => 'assignment',
