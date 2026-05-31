@@ -43,21 +43,17 @@
 </head>
 <body class="bg-gray-50 font-sans antialiased h-screen flex flex-col overflow-hidden" x-data="{ sidebarOpen: true }">
 
-    {{-- NAVBAR ATAS --}}
     <header class="bg-white border-b border-gray-200 flex items-center justify-between flex-shrink-0 z-40" style="height:56px;">
         
-        {{-- Area Logo: Dikunci 240px agar posisinya lurus dengan sidebar lebar awal --}}
         <div class="w-[240px] min-w-[240px] h-full flex items-center px-4 border-r border-gray-200 flex-shrink-0">
             <a href="{{ route('admin.courses.index') }}" class="flex items-center w-full">
                 <img src="{{ asset('assets/logo.png') }}" alt="Smart Exam" class="h-9 w-auto object-contain flex-shrink-0">
             </a>
         </div>
 
-        {{-- Area Kanan: Notifikasi & Profil (Mengisi sisa ruang kosong) --}}
         <div class="flex-1 flex items-center justify-end px-6 h-full">
             <div class="flex items-center gap-5">
                 
-                {{-- Notifikasi --}}
                 <button class="relative w-9 h-9 flex items-center justify-center rounded-lg hover:bg-gray-100 transition-colors">
                     <svg class="w-5 h-5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
@@ -65,7 +61,6 @@
                     <span class="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 bg-red-600 text-white text-[9px] font-bold rounded-full flex items-center justify-center ring-2 ring-white leading-none">99+</span>
                 </button>
 
-                {{-- Profile Dropdown --}}
                 <div x-data="{ open: false }" class="relative">
                     <button @click="open = !open" class="flex items-center gap-3 py-1.5 px-1 rounded-lg hover:bg-gray-50 transition-colors">
                         <div class="w-9 h-9 bg-gray-200 rounded-full flex items-center justify-center flex-shrink-0 overflow-hidden border border-gray-300">
@@ -121,14 +116,11 @@
         </div>
     </header>
 
-    {{-- KONTEN BAWAH (Sidebar + Main Content Area) --}}
     <div class="flex flex-1 overflow-hidden w-full">
 
-        {{-- SIDEBAR --}}
         <aside class="flex-shrink-0 bg-white border-r border-gray-200 flex flex-col z-30 transition-all duration-200"
                :style="sidebarOpen ? 'width:240px; min-width:240px;' : 'width:56px; min-width:56px;'">
 
-            {{-- Tombol Menu (Tetap di dalam Sidebar) --}}
             <button @click="sidebarOpen = !sidebarOpen"
                     class="flex items-center gap-3 border-b border-gray-100 text-gray-400 hover:text-gray-600 hover:bg-gray-50 transition-colors flex-shrink-0 w-full"
                     :class="sidebarOpen ? 'px-4 py-3' : 'justify-center px-2 py-3'">
@@ -138,7 +130,6 @@
                 <span x-show="sidebarOpen" x-cloak class="text-[13px] font-medium text-gray-600 whitespace-nowrap">Menu</span>
             </button>
 
-            {{-- Navigasi Menu --}}
             <nav class="flex-1 overflow-y-auto overflow-x-hidden py-2"
                  :class="sidebarOpen ? 'px-3' : 'px-1.5 flex flex-col items-center'">
 
@@ -286,7 +277,6 @@
             </nav>
         </aside>
 
-        {{-- MAIN CONTENT AREA (Flash Messages, Content, & Footer) --}}
         <div class="flex-1 flex flex-col overflow-hidden min-w-0">
 
             @if(session('success'))
