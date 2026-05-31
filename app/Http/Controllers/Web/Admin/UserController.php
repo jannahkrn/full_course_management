@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use App\Services\ImportService;
 
 class UserController extends Controller
 {
@@ -74,81 +75,70 @@ class UserController extends Controller
     }
 
     public function import(Request $request)
-    {
-        $request->validate([
-            'file' => 'required|file|mimes:csv,txt|max:5120',
-        ], [
-            'file.mimes' => 'File harus berformat CSV (.csv). Format Excel (.xlsx/.xls) belum didukung untuk import.',
-        ]);
+{
+    $request->validate([
+        'file' => 'required|file|mimes:csv,txt,xlsx,xls|max:5120',
+    ], [
+        'file.mimes' => 'File harus berformat CSV (.csv) atau Excel (.xlsx/.xls).',
+    ]);
 
-        $file   = $request->file('file');
-        $path   = $file->getRealPath();
+    $importService = new ImportService();
+    $rows          = $importService->readFile($request->file('file'));
 
-        $imported = 0;
-        $skipped  = 0;
-        $errors   = [];
+    $imported = 0;
+    $skipped  = 0;
+    $errors   = [];
 
-        $handle = fopen($path, 'r');
+    foreach ($rows as $index => $row) {
+        $lineNo = $index + 2;
 
-        $header = fgetcsv($handle);
-
-        if ($header && str_starts_with($header[0], "\xEF\xBB\xBF")) {
-            $header[0] = substr($header[0], 3);
+        if (empty(array_filter($row))) {
+            $skipped++;
+            continue;
         }
 
-        $lineNo = 1;
-        while (($row = fgetcsv($handle)) !== false) {
-            $lineNo++;
+        $name     = trim($row[0] ?? '');
+        $email    = trim($row[1] ?? '');
+        $role     = trim($row[2] ?? 'student');
+        $password = trim($row[3] ?? '') ?: 'password123';
 
-            if (empty(array_filter($row))) {
-                $skipped++;
-                continue;
-            }
-
-            $name     = trim($row[0] ?? '');
-            $email    = trim($row[1] ?? '');
-            $role     = trim($row[2] ?? 'student');
-            $password = trim($row[3] ?? '') ?: 'password123';
-
-            if (empty($name) || empty($email)) {
-                $skipped++;
-                continue;
-            }
-
-            if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-                $errors[] = "Baris {$lineNo}: Email tidak valid ({$email})";
-                continue;
-            }
-
-            if (!in_array($role, ['admin', 'teacher', 'student'])) {
-                $role = 'student';
-            }
-
-            if (User::where('email', $email)->exists()) {
-                $skipped++;
-                continue;
-            }
-
-            try {
-                User::create([
-                    'name'     => $name,
-                    'email'    => $email,
-                    'role'     => $role,
-                    'password' => Hash::make($password),
-                ]);
-                $imported++;
-            } catch (\Exception $e) {
-                $errors[] = "Baris {$lineNo} (\"{$email}\"): " . $e->getMessage();
-            }
+        if (empty($name) || empty($email)) {
+            $skipped++;
+            continue;
         }
 
-        fclose($handle);
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            $errors[] = "Baris {$lineNo}: Email tidak valid ({$email})";
+            continue;
+        }
 
-        $message = "{$imported} pengguna berhasil diimpor.";
-        if ($skipped)       $message .= " {$skipped} baris dilewati.";
-        if (count($errors)) $message .= " " . count($errors) . " baris gagal.";
+        if (!in_array($role, ['admin', 'teacher', 'student'])) {
+            $role = 'student';
+        }
 
-        return redirect()->route('admin.users.index')
-            ->with('success', $message);
+        if (User::where('email', $email)->exists()) {
+            $skipped++;
+            continue;
+        }
+
+        try {
+            User::create([
+                'name'     => $name,
+                'email'    => $email,
+                'role'     => $role,
+                'password' => Hash::make($password),
+            ]);
+            $imported++;
+        } catch (\Exception $e) {
+            $errors[] = "Baris {$lineNo} (\"{$email}\"): " . $e->getMessage();
+        }
     }
+
+    $message = "{$imported} pengguna berhasil diimpor.";
+    if ($skipped)       $message .= " {$skipped} baris dilewati.";
+    if (count($errors)) $message .= " " . count($errors) . " baris gagal.";
+
+    return redirect()->route('admin.users.index')
+        ->with('success', $message);
+}
 }

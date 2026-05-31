@@ -9,6 +9,7 @@ use App\Http\Requests\{StoreCourseRequest, UpdateCourseRequest};
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Response;
 use Illuminate\Support\Str;
+use App\Services\ImportService;
 
 class CourseController extends Controller
 {
@@ -197,66 +198,55 @@ class CourseController extends Controller
     }
 
     public function import(Request $request)
-    {
-        $request->validate([
-            'file' => 'required|file|mimes:csv,txt|max:5120',
-        ], [
-            'file.mimes' => 'File harus berformat CSV (.csv). Format Excel (.xlsx/.xls) belum didukung untuk import.',
-        ]);
+{
+    $request->validate([
+        'file' => 'required|file|mimes:csv,txt,xlsx,xls|max:5120',
+    ], [
+        'file.mimes' => 'File harus berformat CSV (.csv) atau Excel (.xlsx/.xls).',
+    ]);
 
-        $file   = $request->file('file');
-        $path   = $file->getRealPath();
+    $importService = new ImportService();
+    $rows          = $importService->readFile($request->file('file'));
 
-        $imported = 0;
-        $skipped  = 0;
-        $errors   = [];
+    $imported = 0;
+    $skipped  = 0;
+    $errors   = [];
 
-        $handle = fopen($path, 'r');
+    foreach ($rows as $index => $row) {
+        $lineNo = $index + 2; // +2 karena index 0-based dan baris 1 adalah header
 
-        $header = fgetcsv($handle);
-
-        if ($header && str_starts_with($header[0], "\xEF\xBB\xBF")) {
-            $header[0] = substr($header[0], 3);
+        if (empty(array_filter($row))) {
+            $skipped++;
+            continue;
         }
 
-        $lineNo = 1;
-        while (($row = fgetcsv($handle)) !== false) {
-            $lineNo++;
+        $title    = trim($row[1] ?? '');
+        $code     = trim($row[2] ?? '') ?: null;
+        $language = (trim($row[4] ?? '') === 'Bahasa Indonesia') ? 'id' : 'en';
 
-            if (empty(array_filter($row))) {
-                $skipped++;
-                continue;
-            }
-
-            $title    = trim($row[1] ?? '');
-            $code     = trim($row[2] ?? '') ?: null;
-            $language = (trim($row[4] ?? '') === 'Bahasa Indonesia') ? 'id' : 'en';
-
-            if (empty($title)) {
-                $skipped++;
-                continue;
-            }
-
-            try {
-                $this->courseService->createFromImport([
-                    'title'    => $title,
-                    'code'     => $code,
-                    'language' => $language,
-                ]);
-                $imported++;
-            } catch (\Exception $e) {
-                $errors[] = "Baris {$lineNo} (\"{$title}\"): " . $e->getMessage();
-            }
+        if (empty($title)) {
+            $skipped++;
+            continue;
         }
 
-        fclose($handle);
-
-        $message = "{$imported} mata kuliah berhasil diimpor.";
-        if ($skipped)       $message .= " {$skipped} baris dilewati.";
-        if (count($errors)) $message .= " " . count($errors) . " baris gagal.";
-
-        return redirect()->route('admin.courses.index')
-            ->with('success', $message)
-            ->with('import_errors', $errors);
+        try {
+            $this->courseService->createFromImport([
+                'title'    => $title,
+                'code'     => $code,
+                'language' => $language,
+            ]);
+            $imported++;
+        } catch (\Exception $e) {
+            $errors[] = "Baris {$lineNo} (\"{$title}\"): " . $e->getMessage();
+        }
     }
+
+    $message = "{$imported} mata kuliah berhasil diimpor.";
+    if ($skipped)       $message .= " {$skipped} baris dilewati.";
+    if (count($errors)) $message .= " " . count($errors) . " baris gagal.";
+
+    return redirect()->route('admin.courses.index')
+        ->with('success', $message)
+        ->with('import_errors', $errors);
+}
 }
