@@ -42,25 +42,9 @@ class DatabaseSeeder extends Seeder
             'is_active' => true,
         ]);
 
-        $teacher3 = User::create([
-            'name'      => 'Teacher',
-            'email'     => 'teacher@smartexam.id',
-            'password'  => Hash::make('password'),
-            'role'      => 'teacher',
-            'is_active' => true,
-        ]);
-
         $student = User::create([
             'name'      => 'Madeleine S',
             'email'     => 'madeleine@smartexam.id',
-            'password'  => Hash::make('password'),
-            'role'      => 'student',
-            'is_active' => true,
-        ]);
-
-        $student = User::create([
-            'name'      => 'Student',
-            'email'     => 'student@smartexam.id',
             'password'  => Hash::make('password'),
             'role'      => 'student',
             'is_active' => true,
