@@ -16,7 +16,6 @@
         </a>
     </div>
 
-    {{-- Filter --}}
     <div class="bg-white rounded-xl border border-gray-200 p-4">
         <form method="GET" action="{{ route('admin.users.index') }}">
             <div class="flex gap-2.5 items-center">
@@ -48,7 +47,6 @@
         </form>
     </div>
 
-    {{-- Table --}}
     <div class="bg-white rounded-xl border border-gray-200 overflow-hidden">
         <div class="px-5 py-3 flex items-center justify-between border-b border-gray-100">
             <span class="text-sm font-semibold text-gray-700">List</span>
