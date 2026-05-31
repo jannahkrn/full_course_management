@@ -169,8 +169,8 @@ Buka browser: `http://localhost:8000`
 | Role    | Email                   | Password  |
 |---------|-------------------------|-----------|
 | Admin   | admin@smartexam.id      | password  |
-| Teacher | teacher@smartexam.id    | password  |
-| Student | student@smartexam.id    | password  |
+| Teacher | albert@smartexam.id    | password  |
+| Student | madeleine@smartexam   | password  |
 
 ---
 
