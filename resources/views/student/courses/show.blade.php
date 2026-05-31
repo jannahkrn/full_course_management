@@ -27,7 +27,6 @@
 @section('content')
 <div class="p-6 space-y-5">
 
-    {{-- Header --}}
     <div class="flex items-start justify-between">
         <div>
             <div class="flex items-center gap-2 mb-1">
@@ -129,7 +128,6 @@
                 @endif
             </div>
 
-            {{-- LATIHAN --}}
             <div x-show="tab==='latihan'">
                 @php $exercises = $course->sessions->flatMap->exercises; @endphp
                 @if($exercises->count())
