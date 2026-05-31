@@ -130,17 +130,16 @@
         <aside class="flex-shrink-0 bg-white border-r border-gray-200 flex flex-col transition-all duration-300 z-30"
                :class="sidebarOpen ? 'w-[220px]' : 'w-[52px]'">
 
-            <nav class="flex-1 overflow-y-auto px-2.5 py-3 space-y-0.5 overflow-x-hidden whitespace-nowrap">
-                <div class="px-2.5 pb-2 border-b border-gray-100 mb-2 flex justify-start">
-                    <button @click="sidebarOpen = !sidebarOpen" 
-                            class="flex items-center gap-2 text-gray-500 hover:text-blue-600 font-bold transition-colors focus:outline-none">
-                        <svg class="w-4 h-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
-                        </svg>
-                        <span x-show="sidebarOpen" class="text-[11px] letter-spacing:0.08em uppercase">Menu</span>
-                    </button>
-                </div>
+            <button @click="sidebarOpen = !sidebarOpen"
+                    class="flex items-center gap-3 border-b border-gray-100 text-gray-400 hover:text-gray-600 hover:bg-gray-50 transition-colors flex-shrink-0 w-full"
+                    :class="sidebarOpen ? 'px-4 py-3' : 'justify-center px-2 py-3'">
+                <svg class="w-5 h-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+                </svg>
+                <span x-show="sidebarOpen" x-cloak class="text-[13px] font-medium text-gray-600 whitespace-nowrap">Menu</span>
+            </button>
 
+            <nav class="flex-1 overflow-y-auto px-2.5 py-3 space-y-0.5 overflow-x-hidden whitespace-nowrap">
                 @yield('sidebar-nav')
             </nav>
         </aside>
