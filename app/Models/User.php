@@ -27,18 +27,15 @@ class User extends Authenticatable
         'is_active' => 'boolean',
     ];
 
-    // ─── Scopes ───────────────────────────────────────────────────────
     public function scopeAdmins($query)    { return $query->where('role', 'admin'); }
     public function scopeTeachers($query)  { return $query->where('role', 'teacher'); }
     public function scopeStudents($query)  { return $query->where('role', 'student'); }
     public function scopeActive($query)    { return $query->where('is_active', true); }
 
-    // ─── Helpers ──────────────────────────────────────────────────────
     public function isAdmin(): bool   { return $this->role === 'admin'; }
     public function isTeacher(): bool { return $this->role === 'teacher'; }
     public function isStudent(): bool { return $this->role === 'student'; }
 
-    // ─── Relations ────────────────────────────────────────────────────
     public function teachingCourses(): BelongsToMany
     {
         return $this->belongsToMany(Course::class, 'course_teachers', 'user_id', 'course_id')
