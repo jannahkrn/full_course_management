@@ -100,6 +100,16 @@
     @if(session('error'))
     <div class="p-4 bg-red-50 border border-red-200 rounded-xl text-sm text-red-700">{{ session('error') }}</div>
     @endif
+    @if(session('import_errors') && count(session('import_errors')) > 0)
+    <div class="p-4 bg-yellow-50 border border-yellow-200 rounded-xl text-sm text-yellow-800">
+        <p class="font-semibold mb-1">Detail baris yang gagal diimpor:</p>
+        <ul class="list-disc list-inside space-y-0.5">
+            @foreach(session('import_errors') as $err)
+                <li>{{ $err }}</li>
+            @endforeach
+        </ul>
+    </div>
+    @endif
 
     <div class="border-b border-gray-200">
         <nav class="flex gap-0">
