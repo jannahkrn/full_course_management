@@ -72,7 +72,6 @@
         <form action="{{ route('admin.enrollments.bulk') }}" method="POST">
             @csrf
 
-            {{-- Hidden inputs --}}
             <template x-for="id in selectedUsers" :key="'u'+id">
                 <input type="hidden" name="user_ids[]" :value="id">
             </template>
@@ -82,11 +81,9 @@
 
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
 
-                {{-- ── Pilih Pengguna ── --}}
                 <div>
                     <label class="block text-sm font-semibold text-gray-700 mb-3">Pilih Pengguna</label>
 
-                    {{-- Selected chips --}}
                     <div class="flex flex-wrap gap-2 min-h-[2rem] mb-3">
                         <template x-for="u in selectedUserObjs" :key="u.id">
                             <span class="inline-flex items-center gap-1.5 pl-3 pr-1.5 py-1 bg-blue-50 text-blue-700 text-xs font-medium rounded-full border border-blue-200">
@@ -100,7 +97,6 @@
                         <span x-show="selectedUsers.length === 0" class="text-xs text-gray-400 self-center">Belum ada pengguna dipilih</span>
                     </div>
 
-                    {{-- Search + List --}}
                     <div class="border border-gray-200 rounded-xl overflow-hidden">
                         <div class="p-2 border-b border-gray-100">
                             <div class="relative">
@@ -130,16 +126,12 @@
                     <p class="mt-1.5 text-xs text-gray-400" x-text="`${selectedUsers.length} pengguna dipilih`"></p>
                 </div>
 
-                {{-- Arrow icon (center, desktop) --}}
                 <div class="hidden lg:flex items-start justify-center pt-10 -mx-4">
-                    {{-- just layout spacer, actual arrow shown in between --}}
                 </div>
 
-                {{-- ── Pilih Mata Kuliah ── --}}
                 <div>
                     <label class="block text-sm font-semibold text-gray-700 mb-3">Pilih Mata Kuliah</label>
 
-                    {{-- Selected chips --}}
                     <div class="flex flex-wrap gap-2 min-h-[2rem] mb-3">
                         <template x-for="c in selectedCourseObjs" :key="c.id">
                             <span class="inline-flex items-center gap-1.5 pl-3 pr-1.5 py-1 bg-green-50 text-green-700 text-xs font-medium rounded-full border border-green-200">
@@ -153,7 +145,6 @@
                         <span x-show="selectedCourses.length === 0" class="text-xs text-gray-400 self-center">Belum ada mata kuliah dipilih</span>
                     </div>
 
-                    {{-- Search + List --}}
                     <div class="border border-gray-200 rounded-xl overflow-hidden">
                         <div class="p-2 border-b border-gray-100">
                             <div class="relative">
@@ -181,7 +172,6 @@
                 </div>
             </div>
 
-            {{-- Submit --}}
             <div class="mt-8 pt-5 border-t border-gray-100 flex items-center justify-between">
                 <div class="text-sm text-gray-500">
                     <span x-text="selectedUsers.length"></span> pengguna →
