@@ -74,7 +74,6 @@
                         </select>
                     </div>
 
-                    {{-- Guru --}}
                     <div x-data="{
                         selected: {{ json_encode(old('teacher_ids', $course->teachers->pluck('id')->map(fn($id) => (string)$id)->toArray())) }},
                         teachers: {{ $teachers->map(fn($t) => ['id' => $t->id, 'name' => $t->name])->toJson() }},
@@ -213,7 +212,6 @@
                         </label>
                     </div>
 
-                    {{-- Tags --}}
                     <div x-data="{
                         tags: {{ json_encode(old('tags', $course->tags ?? [])) }},
                         input: '',
