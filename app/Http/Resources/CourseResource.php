@@ -34,7 +34,6 @@ class CourseResource extends JsonResource
             'created_at'        => $this->created_at?->toDateTimeString(),
             'updated_at'        => $this->updated_at?->toDateTimeString(),
 
-            // Relations (when loaded)
             'category'          => new CourseCategoryResource($this->whenLoaded('category')),
             'teachers'          => UserResource::collection($this->whenLoaded('teachers')),
             'enrolled_count'    => $this->when(
