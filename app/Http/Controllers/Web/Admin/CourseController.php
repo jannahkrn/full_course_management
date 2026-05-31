@@ -14,9 +14,6 @@ class CourseController extends Controller
 {
     public function __construct(private readonly CourseService $courseService) {}
 
-    /**
-     * Daftar Mata Kuliah – List Standar & List Manajemen
-     */
     public function index(Request $request)
     {
         $view    = $request->get('view', 'standar'); // standar | manajemen
@@ -37,21 +34,16 @@ class CourseController extends Controller
         return view('admin.courses.index', compact('courses', 'categories', 'teachers', 'view', 'filters'));
     }
 
-    /**
-     * Form Tambah Mata Kuliah
-     */
     public function create()
     {
-        $categories    = CourseCategory::active()->orderBy('name')->get();
-        $teachers      = User::teachers()->active()->orderBy('name')->get();
+        $categories      = CourseCategory::active()->orderBy('name')->get();
+        $teachers        = User::teachers()->active()->orderBy('name')->get();
         $templateCourses = Course::active()->orderBy('title')->get(['id','title']);
 
         return view('admin.courses.create', compact('categories', 'teachers', 'templateCourses'));
     }
 
-    /**
-     * Simpan Mata Kuliah Baru
-     */
+
     public function store(StoreCourseRequest $request)
     {
         $course = $this->courseService->create(
@@ -64,18 +56,13 @@ class CourseController extends Controller
             ->with('success', "Mata kuliah \"{$course->title}\" berhasil dibuat.");
     }
 
-    /**
-     * Detail Mata Kuliah
-     */
+
     public function show(Course $course)
     {
         $course->load(['category', 'teachers', 'sessions.materials', 'sessions.exercises', 'enrollments']);
         return view('admin.courses.show', compact('course'));
     }
 
-    /**
-     * Form Edit Mata Kuliah
-     */
     public function edit(Course $course)
     {
         $course->load(['teachers', 'category']);
@@ -86,9 +73,6 @@ class CourseController extends Controller
         return view('admin.courses.edit', compact('course', 'categories', 'teachers', 'templateCourses'));
     }
 
-    /**
-     * Update Mata Kuliah
-     */
     public function update(UpdateCourseRequest $request, Course $course)
     {
         $this->courseService->update(
@@ -102,9 +86,6 @@ class CourseController extends Controller
             ->with('success', "Mata kuliah \"{$course->title}\" berhasil diperbarui.");
     }
 
-    /**
-     * Hapus Mata Kuliah
-     */
     public function destroy(Course $course)
     {
         $title = $course->title;
@@ -113,9 +94,6 @@ class CourseController extends Controller
             ->with('success', "Mata kuliah \"{$title}\" berhasil dihapus.");
     }
 
-    /**
-     * Buat Cadangan (Duplikat)
-     */
     public function duplicate(Course $course)
     {
         $new = $this->courseService->duplicate($course);
@@ -123,9 +101,6 @@ class CourseController extends Controller
             ->with('success', "Salinan dari \"{$course->title}\" berhasil dibuat.");
     }
 
-    /**
-     * Publish / Unpublish
-     */
     public function publish(Course $course)
     {
         $this->courseService->publish($course);
@@ -138,11 +113,6 @@ class CourseController extends Controller
         return back()->with('success', "Mata kuliah berhasil di-unpublish.");
     }
 
-    /**
-     * Export Daftar Mata Kuliah (CSV / XLSX)
-     *
-     * GET /admin/courses/export?format=csv|xlsx&keyword=...&category_id=...
-     */
     public function export(Request $request)
     {
         $format  = in_array($request->get('format'), ['csv', 'xlsx']) ? $request->get('format') : 'csv';
@@ -151,7 +121,6 @@ class CourseController extends Controller
             'access_type','is_registered','is_allowed','allow_unsubscribe','is_active',
         ]);
 
-        // Ambil semua course tanpa paginasi
         $courses = Course::with(['category', 'teachers'])
             ->when($filters['keyword'] ?? null, fn($q, $v) => $q->search($v))
             ->when($filters['title'] ?? null,   fn($q, $v) => $q->where('title', 'like', "%{$v}%"))
@@ -163,8 +132,8 @@ class CourseController extends Controller
             ->orderBy('title')
             ->get();
 
-        $rows   = [];
         $header = ['ID', 'Judul', 'Kode', 'Kategori', 'Bahasa', 'Guru', 'Terdaftar', 'Akses Terbatas', 'Status', 'Tanggal Dibuat'];
+        $rows   = [];
 
         foreach ($courses as $course) {
             $rows[] = [
@@ -186,7 +155,6 @@ class CourseController extends Controller
         if ($format === 'csv') {
             $callback = function () use ($header, $rows) {
                 $file = fopen('php://output', 'w');
-                // BOM UTF-8 agar Excel bisa membaca karakter khusus
                 fprintf($file, chr(0xEF).chr(0xBB).chr(0xBF));
                 fputcsv($file, $header);
                 foreach ($rows as $row) {
@@ -201,25 +169,21 @@ class CourseController extends Controller
             ]);
         }
 
-        // Format Excel (XLSX) menggunakan penulisan manual SpreadsheetML
-        // (jika ingin pakai library seperti PhpSpreadsheet, ganti bagian ini)
         $xml  = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>';
-        $xml .= '<Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet"
-                           xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet">';
+        $xml .= '<Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet"'
+              . ' xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet">';
         $xml .= '<Worksheet ss:Name="Daftar Mata Kuliah"><Table>';
 
-        // Header row
         $xml .= '<Row>';
         foreach ($header as $h) {
-            $xml .= '<Cell><Data ss:Type="String">' . htmlspecialchars($h) . '</Data></Cell>';
+            $xml .= '<Cell><Data ss:Type="String">' . htmlspecialchars($h, ENT_XML1, 'UTF-8') . '</Data></Cell>';
         }
         $xml .= '</Row>';
 
-        // Data rows
         foreach ($rows as $row) {
             $xml .= '<Row>';
             foreach ($row as $cell) {
-                $xml .= '<Cell><Data ss:Type="String">' . htmlspecialchars((string) $cell) . '</Data></Cell>';
+                $xml .= '<Cell><Data ss:Type="String">' . htmlspecialchars((string) $cell, ENT_XML1, 'UTF-8') . '</Data></Cell>';
             }
             $xml .= '</Row>';
         }
@@ -232,55 +196,64 @@ class CourseController extends Controller
         ]);
     }
 
-    /**
-     * Import Mata Kuliah dari file CSV / Excel
-     *
-     * POST /admin/courses/import
-     */
     public function import(Request $request)
     {
         $request->validate([
-            'file' => 'required|file|mimes:csv,xlsx,xls|max:5120',
+            'file' => 'required|file|mimes:csv,txt|max:5120',
+        ], [
+            'file.mimes' => 'File harus berformat CSV (.csv). Format Excel (.xlsx/.xls) belum didukung untuk import.',
         ]);
 
-        $file      = $request->file('file');
-        $extension = strtolower($file->getClientOriginalExtension());
-        $path      = $file->getRealPath();
+        $file   = $request->file('file');
+        $path   = $file->getRealPath();
 
         $imported = 0;
         $skipped  = 0;
         $errors   = [];
 
-        if ($extension === 'csv') {
-            $handle = fopen($path, 'r');
-            $header = fgetcsv($handle); // skip header row
+        $handle = fopen($path, 'r');
 
-            // Hapus BOM jika ada
-            if ($header && str_starts_with($header[0], "\xEF\xBB\xBF")) {
-                $header[0] = substr($header[0], 3);
-            }
+        $header = fgetcsv($handle);
 
-            $lineNo = 1;
-            while (($row = fgetcsv($handle)) !== false) {
-                $lineNo++;
-                try {
-                    if (empty(trim($row[1] ?? ''))) { $skipped++; continue; }
-                    $this->courseService->createFromImport([
-                        'title'    => trim($row[1]),
-                        'code'     => trim($row[2] ?? '') ?: null,
-                        'language' => trim($row[4] ?? 'en') === 'Bahasa Indonesia' ? 'id' : 'en',
-                    ]);
-                    $imported++;
-                } catch (\Exception $e) {
-                    $errors[] = "Baris {$lineNo}: " . $e->getMessage();
-                }
-            }
-            fclose($handle);
+        if ($header && str_starts_with($header[0], "\xEF\xBB\xBF")) {
+            $header[0] = substr($header[0], 3);
         }
 
+        $lineNo = 1;
+        while (($row = fgetcsv($handle)) !== false) {
+            $lineNo++;
+
+            if (empty(array_filter($row))) {
+                $skipped++;
+                continue;
+            }
+
+            $title    = trim($row[1] ?? '');
+            $code     = trim($row[2] ?? '') ?: null;
+            $language = (trim($row[4] ?? '') === 'Bahasa Indonesia') ? 'id' : 'en';
+
+            if (empty($title)) {
+                $skipped++;
+                continue;
+            }
+
+            try {
+                $this->courseService->createFromImport([
+                    'title'    => $title,
+                    'code'     => $code,
+                    'language' => $language,
+                ]);
+                $imported++;
+            } catch (\Exception $e) {
+                $errors[] = "Baris {$lineNo} (\"{$title}\"): " . $e->getMessage();
+            }
+        }
+
+        fclose($handle);
+
         $message = "{$imported} mata kuliah berhasil diimpor.";
-        if ($skipped)        $message .= " {$skipped} baris dilewati.";
-        if (count($errors))  $message .= " " . count($errors) . " baris gagal.";
+        if ($skipped)       $message .= " {$skipped} baris dilewati.";
+        if (count($errors)) $message .= " " . count($errors) . " baris gagal.";
 
         return redirect()->route('admin.courses.index')
             ->with('success', $message)
