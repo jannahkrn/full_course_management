@@ -356,23 +356,38 @@
 
                         <td class="px-4 py-3.5">
                             <div x-data="{ open: false }" class="relative inline-block">
-                                <button @click="open = !open"
-                                        class="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-gray-200 bg-white hover:bg-gray-50 text-xs font-medium text-gray-600 transition-colors">
-                                    <span class="w-2 h-2 rounded-full {{ $course->is_active ? 'bg-blue-500' : 'bg-gray-400' }}"></span>
-                                    <svg class="w-3 h-3 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-                                    </svg>
-                                </button>
+                                <div class="inline-flex items-center rounded-lg border border-gray-200 bg-white overflow-hidden">
+                                    <a href="{{ route('admin.courses.show', $course) }}"
+                                       class="flex items-center justify-center w-8 h-8 text-blue-500 hover:bg-blue-50 transition-colors border-r border-gray-200">
+                                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                                        </svg>
+                                    </a>
+                                    <button @click="open = !open"
+                                            class="flex items-center justify-center w-7 h-8 text-gray-400 hover:bg-gray-50 transition-colors">
+                                        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                                        </svg>
+                                    </button>
+                                </div>
                                 <div x-show="open" @click.outside="open = false" x-cloak
                                      class="absolute right-0 mt-1 w-52 bg-white rounded-xl shadow-xl border border-gray-100 py-1.5 z-20">
 
                                     <a href="{{ route('admin.courses.show', $course) }}"
                                        class="flex items-center gap-3 px-4 py-2 text-[13px] text-gray-700 hover:bg-gray-50">
                                         <svg class="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
                                         </svg>
-                                        Lihat Detail
+                                        Situs Mata Kuliah
+                                    </a>
+
+                                    <a href="{{ route('admin.courses.show', $course) }}"
+                                       class="flex items-center gap-3 px-4 py-2 text-[13px] text-gray-700 hover:bg-gray-50">
+                                        <svg class="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                                        </svg>
+                                        Penelusuran
                                     </a>
 
                                     <a href="{{ route('admin.courses.edit', $course) }}"
@@ -446,23 +461,30 @@
 
                         <td class="px-4 py-3.5">
                             <div x-data="{ open: false }" class="relative inline-block">
-                                <button @click="open = !open"
-                                        class="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-gray-200 bg-white hover:bg-gray-50 text-xs font-medium text-gray-600 transition-colors">
-                                    <span class="w-2 h-2 rounded-full {{ $course->is_active ? 'bg-blue-500' : 'bg-gray-400' }}"></span>
-                                    <svg class="w-3 h-3 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-                                    </svg>
-                                </button>
+                                <div class="inline-flex items-center rounded-lg border border-gray-200 bg-white overflow-hidden">
+                                    <a href="{{ route('admin.courses.show', $course) }}"
+                                       class="flex items-center justify-center w-8 h-8 text-blue-500 hover:bg-blue-50 transition-colors border-r border-gray-200">
+                                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                                        </svg>
+                                    </a>
+                                    <button @click="open = !open"
+                                            class="flex items-center justify-center w-7 h-8 text-gray-400 hover:bg-gray-50 transition-colors">
+                                        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                                        </svg>
+                                    </button>
+                                </div>
                                 <div x-show="open" @click.outside="open = false" x-cloak
                                      class="absolute right-0 mt-1 w-52 bg-white rounded-xl shadow-xl border border-gray-100 py-1.5 z-20">
 
                                     <a href="{{ route('admin.courses.show', $course) }}"
                                        class="flex items-center gap-3 px-4 py-2 text-[13px] text-gray-700 hover:bg-gray-50">
                                         <svg class="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
                                         </svg>
-                                        Lihat Detail
+                                        Penelusuran
                                     </a>
 
                                     <a href="{{ route('admin.courses.edit', $course) }}"
