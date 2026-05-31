@@ -26,7 +26,6 @@
             </div>
         </div>
 
-        {{-- Validation errors --}}
         @if($errors->any())
         <div class="mb-5 p-4 bg-red-50 border border-red-200 rounded-xl text-sm text-red-700">
             <ul class="list-disc list-inside space-y-1">
@@ -39,7 +38,6 @@
 
         <div class="space-y-5">
 
-            {{-- Judul --}}
             <div class="bg-white rounded-xl border border-gray-200 p-5">
                 <div class="grid grid-cols-1 gap-5">
 
@@ -75,7 +73,6 @@
                         @error('category_id')<p class="mt-1 text-xs text-red-500">{{ $message }}</p>@enderror
                     </div>
 
-                    {{-- Guru (multi-select chip style) --}}
                     <div x-data="{
                         selected: {{ json_encode(old('teacher_ids', [])) }},
                         teachers: {{ $teachers->map(fn($t) => ['id' => $t->id, 'name' => $t->name])->toJson() }},
@@ -92,12 +89,10 @@
                     }">
                         <label class="block text-sm font-medium text-gray-700 mb-1.5">Guru</label>
 
-                        {{-- Hidden inputs --}}
                         <template x-for="id in selected" :key="id">
                             <input type="hidden" name="teacher_ids[]" :value="id">
                         </template>
 
-                        {{-- Selected chips --}}
                         <div class="flex flex-wrap gap-2 mb-2">
                             <template x-for="t in selectedTeachers" :key="t.id">
                                 <span class="inline-flex items-center gap-1.5 px-3 py-1 bg-blue-50 text-blue-700 text-xs font-medium rounded-full border border-blue-200">
@@ -109,7 +104,6 @@
                             </template>
                         </div>
 
-                        {{-- Dropdown to add --}}
                         <select @change="toggle($event.target.value); $event.target.value=''" class="select-field">
                             <option value="">+ Tambah guru...</option>
                             <template x-for="t in teachers" :key="t.id">
@@ -166,7 +160,6 @@
                         </select>
                     </div>
 
-                    {{-- Langganan --}}
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-2">Langganan</label>
                         <div class="flex gap-6">
@@ -185,7 +178,6 @@
                         </div>
                     </div>
 
-                    {{-- Berhenti Berlangganan --}}
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-2">Berhenti Berlangganan</label>
                         <div class="flex gap-6">
@@ -204,7 +196,6 @@
                         </div>
                     </div>
 
-                    {{-- Ruang Penyimpanan --}}
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1.5">Ruang Penyimpanan</label>
                         <div class="relative">
@@ -215,7 +206,6 @@
                         </div>
                     </div>
 
-                    {{-- Mata Kuliah Khusus --}}
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-2">Mata Kuliah Khusus</label>
                         <label class="flex items-center gap-2 cursor-pointer">
@@ -226,7 +216,6 @@
                         </label>
                     </div>
 
-                    {{-- Tags --}}
                     <div x-data="{
                         tags: {{ json_encode(old('tags', [])) }},
                         input: '',
@@ -262,7 +251,6 @@
                         <p class="mt-1 text-xs text-gray-400">Tekan Enter atau koma untuk menambah tag</p>
                     </div>
 
-                    {{-- URL Video --}}
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1.5">URL Video</label>
                         <input type="text" name="video_url" value="{{ old('video_url') }}"
@@ -273,7 +261,6 @@
                 </div>
             </div>
 
-            {{-- Submit --}}
             <div class="flex justify-end gap-2 pb-2">
                 <a href="{{ route('admin.courses.index') }}" class="btn-secondary">Batal</a>
                 <button type="submit" class="btn-primary">
