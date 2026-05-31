@@ -21,7 +21,6 @@
         </a>
     </div>
 
-    {{-- Filter --}}
     <div class="bg-white rounded-xl border border-gray-200 p-4">
         <form method="GET" action="{{ route('admin.enrollments.index', $course) }}">
             <div class="flex gap-2.5">
@@ -44,7 +43,6 @@
         </form>
     </div>
 
-    {{-- Table --}}
     <div class="bg-white rounded-xl border border-gray-200 overflow-hidden">
         <div class="px-5 py-3 border-b border-gray-100">
             <span class="text-sm font-semibold text-gray-700">List Peserta ({{ $enrollments->total() }})</span>
