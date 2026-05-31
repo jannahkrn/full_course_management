@@ -11,7 +11,6 @@
 @section('content')
 <div class="p-6 space-y-5">
 
-    {{-- Header --}}
     <div class="flex items-start justify-between">
         <div>
             <div class="flex items-center gap-2 mb-1">
@@ -32,7 +31,6 @@
             @endif
         </div>
         <div class="flex items-center gap-2">
-            {{-- Publish / Unpublish --}}
             @if($course->is_active)
                 <form action="{{ route('admin.courses.unpublish', $course) }}" method="POST">
                     @csrf
@@ -69,10 +67,8 @@
 
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
 
-        {{-- Left: Info --}}
         <div class="lg:col-span-2 space-y-5">
 
-            {{-- Info Umum --}}
             <div class="bg-white rounded-xl border border-gray-200 p-5">
                 <h2 class="text-sm font-semibold text-gray-700 mb-4">Informasi Umum</h2>
                 <dl class="grid grid-cols-2 gap-x-6 gap-y-4 text-sm">
@@ -140,7 +136,6 @@
                 @endif
             </div>
 
-            {{-- Guru --}}
             <div class="bg-white rounded-xl border border-gray-200 p-5">
                 <h2 class="text-sm font-semibold text-gray-700 mb-4">Guru</h2>
                 @if($course->teachers->count())
@@ -165,7 +160,6 @@
                 @endif
             </div>
 
-            {{-- Sesi --}}
             <div class="bg-white rounded-xl border border-gray-200 p-5">
                 <div class="flex items-center justify-between mb-4">
                     <h2 class="text-sm font-semibold text-gray-700">Sesi ({{ $course->sessions->count() }})</h2>
@@ -198,10 +192,7 @@
             </div>
         </div>
 
-        {{-- Right: Stats + Enrollment --}}
         <div class="space-y-5">
-
-            {{-- Stats --}}
             <div class="bg-white rounded-xl border border-gray-200 p-5">
                 <h2 class="text-sm font-semibold text-gray-700 mb-4">Statistik</h2>
                 <div class="space-y-3">
@@ -220,7 +211,6 @@
                 </div>
             </div>
 
-            {{-- Quick Actions --}}
             <div class="bg-white rounded-xl border border-gray-200 p-5">
                 <h2 class="text-sm font-semibold text-gray-700 mb-4">Aksi Cepat</h2>
                 <div class="space-y-2">
@@ -239,7 +229,6 @@
                 </div>
             </div>
 
-            {{-- Recent Enrollments --}}
             <div class="bg-white rounded-xl border border-gray-200 p-5">
                 <div class="flex items-center justify-between mb-4">
                     <h2 class="text-sm font-semibold text-gray-700">Peserta Terbaru</h2>
