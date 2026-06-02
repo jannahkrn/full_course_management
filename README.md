@@ -8,13 +8,13 @@ Fitur Full Course Management untuk platform Smart Exam, mencakup manajemen mata 
 
 ## Tech Stack
 
-| Layer      | Teknologi                        |
-|------------|----------------------------------|
-| Backend    | PHP 8.2+, Laravel 12             |
-| Database   | MySQL 8.0                        |
-| Frontend   | Blade, Tailwind CSS 3, Alpine.js 3 |
-| Auth       | Laravel Sanctum (API) + Session (Web) |
-| Import     | phpoffice/phpspreadsheet         |
+| Layer      | Teknologi                                   |
+|------------|---------------------------------------------|
+| Backend    | PHP 8.2+, Laravel 12                        |
+| Database   | MySQL 8.0                                   |
+| Frontend   | Blade, Tailwind CSS 3, Alpine.js 3          |
+| Auth       | Laravel Sanctum (API) + Session (Web)       |
+| Import     | phpoffice/phpspreadsheet (untuk baca Excel) |
 
 ---
 
@@ -25,7 +25,7 @@ smart-exam/
 ├── app/
 │   ├── Http/
 │   │   ├── Controllers/
-│   │   │   ├── Api/                        ← REST API controllers
+│   │   │   ├── Api/                         ← REST API controllers
 │   │   │   │   ├── AuthController.php
 │   │   │   │   ├── CourseController.php
 │   │   │   │   ├── CourseCategoryController.php
@@ -33,10 +33,10 @@ smart-exam/
 │   │   │   │   ├── EnrollmentController.php
 │   │   │   │   ├── UserController.php
 │   │   │   │   └── ActivityLogController.php
-│   │   │   └── Web/Admin/                  ← Web (Blade) controllers
-│   │   │       ├── CourseController.php    ← CRUD, Export, Import
+│   │   │   └── Web/Admin/                   ← Web (Blade) controllers
+│   │   │       ├── CourseController.php     ← CRUD, Export, Import Courses
 │   │   │       ├── EnrollmentController.php ← Bulk Enroll
-│   │   │       ├── UserController.php      ← CRUD + Import Users
+│   │   │       ├── UserController.php       ← CRUD + Import Users
 │   │   │       └── CourseCategoryController.php
 │   │   ├── Middleware/
 │   │   │   └── RoleMiddleware.php
@@ -55,7 +55,7 @@ smart-exam/
 │   └── Services/
 │       ├── CourseService.php       ← Logika bisnis mata kuliah
 │       ├── EnrollmentService.php   ← Logika enrollment
-│       └── ImportService.php       ← Parsing CSV & Excel
+│       └── ImportService.php       ← Parsing CSV & Excel (phpspreadsheet)
 ├── resources/views/
 │   ├── admin/courses/
 │   │   ├── index.blade.php         ← Daftar MK (dual-view + Import/Export modal)
@@ -68,8 +68,7 @@ smart-exam/
 │   └── admin/users/
 │       ├── index.blade.php
 │       ├── create.blade.php
-│       ├── edit.blade.php
-│       └── show.blade.php
+│       └── edit.blade.php
 ├── routes/
 │   ├── web.php                     ← Web routes (Admin, Teacher, Student)
 │   └── api.php                     ← API routes (Sanctum)
@@ -113,6 +112,8 @@ cd smart-exam
 ```bash
 composer install
 ```
+
+> Library `phpoffice/phpspreadsheet` sudah tercantum di `composer.json` dan akan otomatis terinstall.
 
 ### 3. Install dependensi Node.js
 
@@ -169,7 +170,7 @@ Buka browser: `http://localhost:8000`
 | Role    | Email                   | Password  |
 |---------|-------------------------|-----------|
 | Admin   | admin@smartexam.id      | password  |
-| Teacher | albert@smartexam.id    | password  |
+| Teacher | albert@smartexam.id     | password  |
 | Student | madeleine@smartexam.id  | password  |
 
 ---
@@ -213,14 +214,16 @@ Kolom (urutan harus sesuai):
 | 3             | Kategori    | Diabaikan saat import               |
 | 4             | Bahasa      | `Bahasa Indonesia` atau `English`   |
 
-## Format File CSV Import Pengguna
+> Tip: Gunakan hasil Export CSV sebagai template import. Format kolomnya sudah sesuai.
 
-| Kolom (Index) | Nama Kolom | Keterangan                                   |
-|---------------|------------|----------------------------------------------|
-| 0             | Nama       | **Wajib**                                    |
-| 1             | Email      | **Wajib**, harus unik                        |
-| 2             | Role       | `admin`, `teacher`, atau `student` (default) |
-| 3             | Password   | Opsional (default: `password123`)            |
+## Format File CSV/Excel Import Pengguna
+
+| Kolom (Index) | Nama Kolom | Keterangan                                    |
+|---------------|------------|-----------------------------------------------|
+| 0             | Nama       | **Wajib**                                     |
+| 1             | Email      | **Wajib**, harus unik                         |
+| 2             | Role       | `admin`, `teacher`, atau `student` (default)  |
+| 3             | Password   | Opsional (default: `password123`)             |
 
 ---
 
@@ -259,8 +262,18 @@ curl -X POST http://localhost:8000/api/admin/enrollments/bulk \
 
 ## Pembagian Fitur (Tim)
 
-| Anggota           | Fitur                                                      |
-|-------------------|------------------------------------------------------------|
-| Jannah Kurniawati | Export CSV/Excel, Import Mata Kuliah dari CSV              |
-| Rizky Argo Pradana| Course List (dual-view, filter, search), Update Course     |
-| Restu Erlangga    | Tambah Pengguna (Bulk Enrollment), Import Daftar Pengguna  |
+| Anggota            | Fitur                                                      |
+|--------------------|------------------------------------------------------------|
+| Jannah Kurniawati  | Export CSV/Excel, Import Mata Kuliah dari CSV              |
+| Rizky Argo Pradana | Course List (dual-view, filter, search), Update Course     |
+| Restu Erlangga     | Tambah Pengguna (Bulk Enrollment), Import Daftar Pengguna  |
+
+---
+
+## Hasil Pengujian
+
+| Metode          | Hasil                                                               |
+|-----------------|---------------------------------------------------------------------|
+| Black Box Test  | 14/14 skenario berhasil                                             |
+| Usability Test  | Rata-rata SUS 87,3% — kategori **Good** (threshold 80%)            |
+| Skor tertinggi  | Fitur Ekspor CSV/Excel: 91,3%                                       |
