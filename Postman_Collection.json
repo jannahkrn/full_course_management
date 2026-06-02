@@ -1,0 +1,616 @@
+{
+  "info": {
+    "_postman_id": "smart-exam-full-course-management",
+    "name": "Smart Exam — Full Course Management API",
+    "description": "Koleksi endpoint REST API untuk fitur Full Course Management pada platform Smart Exam. Mencakup autentikasi, manajemen mata kuliah (CRUD), enrollment, sesi, dan activity log.\n\nBase URL: http://localhost:8000/api\n\nCara penggunaan:\n1. Jalankan request 'Login' terlebih dahulu\n2. Token akan otomatis tersimpan di collection variable {{token}}\n3. Semua request lain akan menggunakan token tersebut secara otomatis",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "base_url", "value": "http://localhost:8000/api", "type": "string" },
+    { "key": "token",    "value": "",                           "type": "string" },
+    { "key": "course_id","value": "1",                          "type": "string" },
+    { "key": "user_id",  "value": "3",                          "type": "string" },
+    { "key": "session_id","value": "1",                         "type": "string" }
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }]
+  },
+  "item": [
+    {
+      "name": "Auth",
+      "description": "Endpoint autentikasi: register, login, logout, dan profil pengguna.",
+      "item": [
+        {
+          "name": "Register",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{base_url}}/auth/register", "host": ["{{base_url}}"], "path": ["auth","register"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Mahasiswa Baru\",\n  \"email\": \"mahasiswa@smartexam.id\",\n  \"password\": \"password\",\n  \"password_confirmation\": \"password\"\n}"
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var json = pm.response.json();",
+                  "if (json.token) {",
+                  "    pm.collectionVariables.set('token', json.token);",
+                  "    console.log('Token tersimpan:', json.token);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{base_url}}/auth/login", "host": ["{{base_url}}"], "path": ["auth","login"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@smartexam.id\",\n  \"password\": \"password\"\n}"
+            }
+          },
+          "response": [
+            {
+              "name": "Login Berhasil",
+              "status": "OK",
+              "code": 200,
+              "body": "{\n  \"message\": \"Login berhasil.\",\n  \"token\": \"1|abc123xyz...\",\n  \"user\": {\n    \"id\": 1,\n    \"name\": \"Admin\",\n    \"email\": \"admin@smartexam.id\",\n    \"role\": \"admin\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Me (Profil Saya)",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{base_url}}/auth/me", "host": ["{{base_url}}"], "path": ["auth","me"] }
+          },
+          "response": []
+        },
+        {
+          "name": "Logout",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": ["pm.collectionVariables.set('token', '');"],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "url": { "raw": "{{base_url}}/auth/logout", "host": ["{{base_url}}"], "path": ["auth","logout"] }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Kategori (Publik)",
+      "description": "Endpoint publik untuk melihat daftar kategori mata kuliah — tidak membutuhkan token.",
+      "item": [
+        {
+          "name": "Daftar Semua Kategori",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "GET",
+            "url": { "raw": "{{base_url}}/categories", "host": ["{{base_url}}"], "path": ["categories"] }
+          },
+          "response": []
+        },
+        {
+          "name": "Detail Kategori",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "GET",
+            "url": { "raw": "{{base_url}}/categories/1", "host": ["{{base_url}}"], "path": ["categories","1"] }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Admin — Kategori",
+      "description": "Manajemen kategori mata kuliah oleh Admin (CRUD).",
+      "item": [
+        {
+          "name": "Buat Kategori Baru",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{base_url}}/admin/categories", "host": ["{{base_url}}"], "path": ["admin","categories"] },
+            "body": { "mode": "raw", "raw": "{\n  \"name\": \"Rekayasa Perangkat Lunak\",\n  \"description\": \"Kategori untuk mata kuliah RPL\",\n  \"is_active\": true\n}" }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Kategori",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{base_url}}/admin/categories/1", "host": ["{{base_url}}"], "path": ["admin","categories","1"] },
+            "body": { "mode": "raw", "raw": "{\n  \"name\": \"RPL — Updated\",\n  \"is_active\": true\n}" }
+          },
+          "response": []
+        },
+        {
+          "name": "Hapus Kategori",
+          "request": {
+            "method": "DELETE",
+            "url": { "raw": "{{base_url}}/admin/categories/1", "host": ["{{base_url}}"], "path": ["admin","categories","1"] }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Admin — Users",
+      "description": "Manajemen pengguna oleh Admin (CRUD + daftar teacher + courses per user).",
+      "item": [
+        {
+          "name": "Daftar Semua User",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/admin/users?per_page=10&keyword=&role=",
+              "host": ["{{base_url}}"], "path": ["admin","users"],
+              "query": [
+                { "key": "per_page", "value": "10" },
+                { "key": "keyword",  "value": "" },
+                { "key": "role",     "value": "" }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Buat User Baru",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{base_url}}/admin/users", "host": ["{{base_url}}"], "path": ["admin","users"] },
+            "body": { "mode": "raw", "raw": "{\n  \"name\": \"Mahasiswa Test\",\n  \"email\": \"test@smartexam.id\",\n  \"password\": \"password\",\n  \"role\": \"student\"\n}" }
+          },
+          "response": []
+        },
+        {
+          "name": "Detail User",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{base_url}}/admin/users/{{user_id}}", "host": ["{{base_url}}"], "path": ["admin","users","{{user_id}}"] }
+          },
+          "response": []
+        },
+        {
+          "name": "Update User",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{base_url}}/admin/users/{{user_id}}", "host": ["{{base_url}}"], "path": ["admin","users","{{user_id}}"] },
+            "body": { "mode": "raw", "raw": "{\n  \"name\": \"Nama Diperbarui\",\n  \"email\": \"updated@smartexam.id\",\n  \"role\": \"student\"\n}" }
+          },
+          "response": []
+        },
+        {
+          "name": "Hapus User",
+          "request": {
+            "method": "DELETE",
+            "url": { "raw": "{{base_url}}/admin/users/{{user_id}}", "host": ["{{base_url}}"], "path": ["admin","users","{{user_id}}"] }
+          },
+          "response": []
+        },
+        {
+          "name": "Daftar Semua Teacher",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{base_url}}/admin/teachers", "host": ["{{base_url}}"], "path": ["admin","teachers"] }
+          },
+          "response": []
+        },
+        {
+          "name": "Courses Milik User",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{base_url}}/admin/users/{{user_id}}/courses", "host": ["{{base_url}}"], "path": ["admin","users","{{user_id}}","courses"] }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Admin — Courses",
+      "description": "Manajemen mata kuliah oleh Admin: List Standar, List Manajemen, CRUD, duplikat, publish/unpublish.",
+      "item": [
+        {
+          "name": "List Standar (dengan filter)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/admin/courses?keyword=&category_id=&language=&access_type=&is_registered=&is_active=&sort=created_at&direction=desc&per_page=10",
+              "host": ["{{base_url}}"], "path": ["admin","courses"],
+              "query": [
+                { "key": "keyword",      "value": "",           "description": "Cari judul atau kode" },
+                { "key": "category_id",  "value": "",           "description": "Filter kategori" },
+                { "key": "language",     "value": "",           "description": "id atau en" },
+                { "key": "access_type",  "value": "",           "description": "Tipe akses" },
+                { "key": "is_registered","value": "",           "description": "1=Ya, 0=Tidak" },
+                { "key": "is_active",    "value": "",           "description": "1=Aktif, 0=Nonaktif" },
+                { "key": "sort",         "value": "created_at", "description": "Kolom sort" },
+                { "key": "direction",    "value": "desc",       "description": "asc atau desc" },
+                { "key": "per_page",     "value": "10" }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "List Manajemen",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{base_url}}/admin/courses/management?per_page=10", "host": ["{{base_url}}"], "path": ["admin","courses","management"], "query": [{ "key": "per_page", "value": "10" }] }
+          },
+          "response": []
+        },
+        {
+          "name": "Buat Course Baru",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var json = pm.response.json();",
+                  "if (json.data && json.data.id) {",
+                  "    pm.collectionVariables.set('course_id', json.data.id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{base_url}}/admin/courses", "host": ["{{base_url}}"], "path": ["admin","courses"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Pemrograman Web\",\n  \"code\": \"PW01\",\n  \"category_id\": 1,\n  \"language\": \"id\",\n  \"teacher_ids\": [2],\n  \"description\": \"Mata kuliah pemrograman web menggunakan Laravel\",\n  \"access_type\": \"open\",\n  \"is_registered\": true,\n  \"is_allowed\": false,\n  \"allow_unsubscribe\": true\n}"
+            }
+          },
+          "response": [
+            {
+              "name": "Buat Course Berhasil",
+              "status": "Created",
+              "code": 201,
+              "body": "{\n  \"message\": \"Mata kuliah berhasil dibuat.\",\n  \"data\": {\n    \"id\": 1,\n    \"title\": \"Pemrograman Web\",\n    \"code\": \"PW01\",\n    \"slug\": \"pemrograman-web-a1b2c\",\n    \"language\": \"id\",\n    \"is_active\": false\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Detail Course",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{base_url}}/admin/courses/{{course_id}}", "host": ["{{base_url}}"], "path": ["admin","courses","{{course_id}}"] }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Course (PUT — semua field)",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{base_url}}/admin/courses/{{course_id}}", "host": ["{{base_url}}"], "path": ["admin","courses","{{course_id}}"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Pemrograman Web — Updated\",\n  \"code\": \"PW01\",\n  \"category_id\": 1,\n  \"language\": \"id\",\n  \"teacher_ids\": [2, 3],\n  \"description\": \"Deskripsi diperbarui\",\n  \"access_type\": \"open\",\n  \"is_registered\": true,\n  \"is_allowed\": false,\n  \"allow_unsubscribe\": true\n}"
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Course (PATCH — sebagian field)",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{base_url}}/admin/courses/{{course_id}}", "host": ["{{base_url}}"], "path": ["admin","courses","{{course_id}}"] },
+            "body": { "mode": "raw", "raw": "{\n  \"is_active\": true\n}" }
+          },
+          "response": []
+        },
+        {
+          "name": "Hapus Course (Soft Delete)",
+          "request": {
+            "method": "DELETE",
+            "url": { "raw": "{{base_url}}/admin/courses/{{course_id}}", "host": ["{{base_url}}"], "path": ["admin","courses","{{course_id}}"] }
+          },
+          "response": []
+        },
+        {
+          "name": "Duplikasi Course",
+          "request": {
+            "method": "POST",
+            "url": { "raw": "{{base_url}}/admin/courses/{{course_id}}/duplicate", "host": ["{{base_url}}"], "path": ["admin","courses","{{course_id}}","duplicate"] }
+          },
+          "response": [
+            {
+              "name": "Duplikasi Berhasil",
+              "status": "Created",
+              "code": 201,
+              "body": "{\n  \"message\": \"Course berhasil diduplikasi.\",\n  \"data\": {\n    \"id\": 5,\n    \"title\": \"Salinan dari Pemrograman Web\",\n    \"is_active\": false\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Publish Course",
+          "request": {
+            "method": "POST",
+            "url": { "raw": "{{base_url}}/admin/courses/{{course_id}}/publish", "host": ["{{base_url}}"], "path": ["admin","courses","{{course_id}}","publish"] }
+          },
+          "response": []
+        },
+        {
+          "name": "Unpublish Course",
+          "request": {
+            "method": "POST",
+            "url": { "raw": "{{base_url}}/admin/courses/{{course_id}}/unpublish", "host": ["{{base_url}}"], "path": ["admin","courses","{{course_id}}","unpublish"] }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Admin — Enrollments",
+      "description": "Manajemen pendaftaran pengguna ke mata kuliah: enroll, unenroll, bulk enroll, mark completed.",
+      "item": [
+        {
+          "name": "Daftar Peserta di Course",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/admin/courses/{{course_id}}/enrollments?status=active&keyword=&per_page=10",
+              "host": ["{{base_url}}"], "path": ["admin","courses","{{course_id}}","enrollments"],
+              "query": [
+                { "key": "status",   "value": "active", "description": "active | completed | dropped" },
+                { "key": "keyword",  "value": "" },
+                { "key": "per_page", "value": "10" }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Enroll Users ke Course",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{base_url}}/admin/courses/{{course_id}}/enrollments", "host": ["{{base_url}}"], "path": ["admin","courses","{{course_id}}","enrollments"] },
+            "body": { "mode": "raw", "raw": "{\n  \"user_ids\": [3, 4, 5]\n}" }
+          },
+          "response": [
+            {
+              "name": "Enroll Berhasil",
+              "status": "OK",
+              "code": 200,
+              "body": "{\n  \"message\": \"3 pengguna berhasil didaftarkan.\",\n  \"enrolled\": [3, 4, 5],\n  \"already_enrolled\": []\n}"
+            }
+          ]
+        },
+        {
+          "name": "Unenroll User dari Course",
+          "request": {
+            "method": "DELETE",
+            "url": { "raw": "{{base_url}}/admin/courses/{{course_id}}/enrollments/{{user_id}}", "host": ["{{base_url}}"], "path": ["admin","courses","{{course_id}}","enrollments","{{user_id}}"] }
+          },
+          "response": []
+        },
+        {
+          "name": "Tandai Enrollment Selesai",
+          "request": {
+            "method": "PATCH",
+            "url": { "raw": "{{base_url}}/admin/courses/{{course_id}}/enrollments/{{user_id}}/complete", "host": ["{{base_url}}"], "path": ["admin","courses","{{course_id}}","enrollments","{{user_id}}","complete"] }
+          },
+          "response": []
+        },
+        {
+          "name": "Bulk Enroll (Banyak User ke Banyak Course)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{base_url}}/admin/enrollments/bulk", "host": ["{{base_url}}"], "path": ["admin","enrollments","bulk"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"user_ids\": [3, 4, 5],\n  \"course_ids\": [1, 2, 3]\n}"
+            }
+          },
+          "response": [
+            {
+              "name": "Bulk Enroll Berhasil",
+              "status": "OK",
+              "code": 200,
+              "body": "{\n  \"message\": \"Pendaftaran massal berhasil diproses.\",\n  \"results\": {\n    \"1\": { \"enrolled\": [3,4,5], \"already_enrolled\": [] },\n    \"2\": { \"enrolled\": [3,4],   \"already_enrolled\": [5] },\n    \"3\": { \"enrolled\": [3,4,5], \"already_enrolled\": [] }\n  }\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Admin — Sessions",
+      "description": "Manajemen sesi (pertemuan) dalam mata kuliah oleh Admin.",
+      "item": [
+        {
+          "name": "Daftar Sesi dalam Course",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{base_url}}/admin/courses/{{course_id}}/sessions", "host": ["{{base_url}}"], "path": ["admin","courses","{{course_id}}","sessions"] }
+          },
+          "response": []
+        },
+        {
+          "name": "Buat Sesi Baru",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{base_url}}/admin/courses/{{course_id}}/sessions", "host": ["{{base_url}}"], "path": ["admin","courses","{{course_id}}","sessions"] },
+            "body": { "mode": "raw", "raw": "{\n  \"title\": \"Pertemuan 1 — Pengenalan Laravel\",\n  \"description\": \"Deskripsi sesi pertama\",\n  \"order\": 1\n}" }
+          },
+          "response": []
+        },
+        {
+          "name": "Detail Sesi",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{base_url}}/admin/courses/{{course_id}}/sessions/{{session_id}}", "host": ["{{base_url}}"], "path": ["admin","courses","{{course_id}}","sessions","{{session_id}}"] }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Sesi",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{base_url}}/admin/courses/{{course_id}}/sessions/{{session_id}}", "host": ["{{base_url}}"], "path": ["admin","courses","{{course_id}}","sessions","{{session_id}}"] },
+            "body": { "mode": "raw", "raw": "{\n  \"title\": \"Pertemuan 1 — Updated\",\n  \"order\": 1\n}" }
+          },
+          "response": []
+        },
+        {
+          "name": "Hapus Sesi",
+          "request": {
+            "method": "DELETE",
+            "url": { "raw": "{{base_url}}/admin/courses/{{course_id}}/sessions/{{session_id}}", "host": ["{{base_url}}"], "path": ["admin","courses","{{course_id}}","sessions","{{session_id}}"] }
+          },
+          "response": []
+        },
+        {
+          "name": "Reorder Sesi",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{base_url}}/admin/courses/{{course_id}}/sessions/reorder", "host": ["{{base_url}}"], "path": ["admin","courses","{{course_id}}","sessions","reorder"] },
+            "body": { "mode": "raw", "raw": "{\n  \"session_ids\": [3, 1, 2]\n}" }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Teacher",
+      "description": "Endpoint untuk Teacher (dan Admin): katalog course yang diampu, sesi, dan peserta.",
+      "item": [
+        {
+          "name": "Katalog Course yang Diampu",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{base_url}}/teacher/courses/catalog?per_page=10", "host": ["{{base_url}}"], "path": ["teacher","courses","catalog"], "query": [{ "key": "per_page", "value": "10" }] }
+          },
+          "response": []
+        },
+        {
+          "name": "Detail Course (Teacher)",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{base_url}}/teacher/courses/{{course_id}}", "host": ["{{base_url}}"], "path": ["teacher","courses","{{course_id}}"] }
+          },
+          "response": []
+        },
+        {
+          "name": "Daftar Peserta (Teacher)",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{base_url}}/teacher/courses/{{course_id}}/enrollments", "host": ["{{base_url}}"], "path": ["teacher","courses","{{course_id}}","enrollments"] }
+          },
+          "response": []
+        },
+        {
+          "name": "Daftar Sesi (Teacher)",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{base_url}}/teacher/courses/{{course_id}}/sessions", "host": ["{{base_url}}"], "path": ["teacher","courses","{{course_id}}","sessions"] }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Student",
+      "description": "Endpoint untuk Student: daftar course yang diikuti, detail, unenroll, dan activity log.",
+      "item": [
+        {
+          "name": "Daftar Course Saya",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{base_url}}/student/courses?keyword=&category_id=&per_page=10", "host": ["{{base_url}}"], "path": ["student","courses"], "query": [{ "key": "keyword", "value": "" }, { "key": "category_id", "value": "" }, { "key": "per_page", "value": "10" }] }
+          },
+          "response": []
+        },
+        {
+          "name": "Detail Course + Materi (Student)",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{base_url}}/student/courses/{{course_id}}/detail", "host": ["{{base_url}}"], "path": ["student","courses","{{course_id}}","detail"] }
+          },
+          "response": []
+        },
+        {
+          "name": "Berhenti dari Course (Self-Unenroll)",
+          "request": {
+            "method": "DELETE",
+            "url": { "raw": "{{base_url}}/student/courses/{{course_id}}/unenroll", "host": ["{{base_url}}"], "path": ["student","courses","{{course_id}}","unenroll"] }
+          },
+          "response": []
+        },
+        {
+          "name": "Semua Enrollment Saya",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{base_url}}/student/enrollments", "host": ["{{base_url}}"], "path": ["student","enrollments"] }
+          },
+          "response": []
+        },
+        {
+          "name": "Course Baru Dikunjungi (Recent)",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{base_url}}/student/activity/recent", "host": ["{{base_url}}"], "path": ["student","activity","recent"] }
+          },
+          "response": []
+        },
+        {
+          "name": "Riwayat Aktivitas",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{base_url}}/student/activity/history", "host": ["{{base_url}}"], "path": ["student","activity","history"] }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Activity Log",
+      "description": "Mencatat kunjungan pengguna ke course.",
+      "item": [
+        {
+          "name": "Catat Kunjungan ke Course",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{base_url}}/courses/{{course_id}}/activity", "host": ["{{base_url}}"], "path": ["courses","{{course_id}}","activity"] },
+            "body": { "mode": "raw", "raw": "{\n  \"action\": \"visited\"\n}" }
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}
